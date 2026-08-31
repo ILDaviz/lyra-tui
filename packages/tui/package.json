@@ -1,0 +1,29 @@
+{
+  "name": "@lyratui/tui",
+  "version": "0.1.0",
+  "description": "OpenTUI React terminal user interface for Lyra",
+  "bin": {
+    "lyratui": "./bin/lyra-tui.ts"
+  },
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
+  "scripts": {
+    "dev": "bun run bin/lyra-tui.ts",
+    "start": "bun run bin/lyra-tui.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@lyratui/core": "workspace:*",
+    "@opentui/core": "0.5.7",
+    "@opentui/keymap": "0.5.7",
+    "@opentui/react": "0.5.7",
+    "fuse.js": "^7.5.0",
+    "react": "^19.2.8",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "@types/react": "^19.2.18",
+    "typescript": "^6.0.3"
+  }
+}

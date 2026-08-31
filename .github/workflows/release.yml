@@ -1,0 +1,95 @@
+name: Release Lyra Standalone Binaries
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Tag name for the release (e.g. v0.1.0)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: darwin-arm64
+            binary_name: lyra-darwin-arm64
+          - os: ubuntu-latest
+            target: linux-x64
+            binary_name: lyra-linux-x64
+          - os: windows-latest
+            target: windows-x64
+            binary_name: lyra-windows-x64.exe
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests
+        if: matrix.os != 'windows-latest'
+        run: bun run test
+
+      - name: Compile standalone binary
+        if: matrix.target != 'linux-x64'
+        run: |
+          mkdir -p dist
+          bun build --compile --minify --production packages/tui/bin/lyra-tui.ts --define 'process.env.LYRA_VERSION=${{ toJSON(github.event.release.tag_name || inputs.tag_name || github.ref_name) }}' --outfile dist/${{ matrix.binary_name }}
+
+      - name: Compile Linux standalone binary
+        if: matrix.target == 'linux-x64'
+        run: |
+          mkdir -p dist
+          bun build --compile --minify --production packages/tui/bin/lyra-tui.ts --define 'process.env.LYRA_VERSION=${{ toJSON(github.event.release.tag_name || inputs.tag_name || github.ref_name) }}' --define 'process.env.OPENTUI_LIBC="glibc"' --outfile dist/${{ matrix.binary_name }}
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.binary_name }}
+          path: dist/${{ matrix.binary_name }}
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate SHA256 Checksums
+        working-directory: dist
+        run: |
+          sha256sum lyra-* > SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name || inputs.tag_name || github.ref_name }}
+          files: |
+            dist/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false

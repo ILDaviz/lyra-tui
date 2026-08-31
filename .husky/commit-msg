@@ -1,0 +1,3 @@
+#!/bin/sh
+
+bunx --no-install commitlint --edit "$1"

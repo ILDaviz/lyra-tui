@@ -1,0 +1,37 @@
+{
+  "name": "lyra-tui",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Lyra TUI - Terminal-based personal notes and knowledge manager",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run packages/tui/bin/lyra-tui.ts",
+    "start": "bun run packages/tui/bin/lyra-tui.ts",
+    "tui": "bun run packages/tui/bin/lyra-tui.ts",
+    "prepare": "husky",
+    "test": "vitest run",
+    "build": "tsc -b",
+    "build:bin": "bun build --compile --minify --production packages/tui/bin/lyra-tui.ts --outfile dist/lyra",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "commitlint": "commitlint --edit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
+    "@commitlint/types": "^21.2.0",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.1.0",
+    "eslint": "^10.8.1",
+    "eslint-plugin-import": "^2.32.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^4.1.9"
+  }
+}

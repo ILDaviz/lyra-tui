@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { GitService } from "../src/git-service";
+
+const execFileAsync = promisify(execFile);
 
 describe("GitService", () => {
   const testRepoPath = path.join(__dirname, "temp-test-repo");
@@ -183,5 +187,65 @@ describe("GitService", () => {
 
     expect(hasStarterCommit).toBe(false);
     expect(hasRealCommit).toBe(true);
+  });
+
+  it("should untrack a pre-existing tracked .env on commit", async () => {
+    const legacyRepoPath = path.join(__dirname, "temp-test-repo-legacy-env");
+    await fs.rm(legacyRepoPath, { recursive: true, force: true }).catch(
+      () => {},
+    );
+    await fs.mkdir(legacyRepoPath, { recursive: true });
+
+    await fs.writeFile(
+      path.join(legacyRepoPath, "note.md"),
+      "note content",
+      "utf-8",
+    );
+    await fs.writeFile(
+      path.join(legacyRepoPath, ".env"),
+      "OPENAI_TOKEN=supersecret",
+      "utf-8",
+    );
+
+    await execFileAsync("git", ["init"], { cwd: legacyRepoPath });
+    await execFileAsync("git", ["config", "user.email", "test@test.local"], {
+      cwd: legacyRepoPath,
+    });
+    await execFileAsync("git", ["config", "user.name", "Test"], {
+      cwd: legacyRepoPath,
+    });
+    await execFileAsync("git", ["add", "."], { cwd: legacyRepoPath });
+    await execFileAsync("git", ["commit", "-m", "legacy initial commit"], {
+      cwd: legacyRepoPath,
+    });
+
+    const gitService = new GitService(legacyRepoPath);
+    expect(await gitService.isTracked(".env")).toBe(true);
+
+    await fs.writeFile(
+      path.join(legacyRepoPath, "note.md"),
+      "note content updated",
+      "utf-8",
+    );
+    const committed = await gitService.commit("docs: update note", "note.md");
+    expect(committed).toBe(true);
+
+    expect(await gitService.isTracked(".env")).toBe(false);
+
+    const envContent = await fs.readFile(
+      path.join(legacyRepoPath, ".env"),
+      "utf-8",
+    );
+    expect(envContent).toContain("OPENAI_TOKEN=supersecret");
+
+    const gitignoreContent = await fs.readFile(
+      path.join(legacyRepoPath, ".gitignore"),
+      "utf-8",
+    );
+    expect(gitignoreContent).toContain(".env");
+
+    await fs
+      .rm(legacyRepoPath, { recursive: true, force: true })
+      .catch(() => {});
   });
 });

@@ -108,6 +108,45 @@ export class GitService {
     }
   }
 
+  private envUntracked = false;
+
+  private async ensureEnvUntracked(): Promise<void> {
+    if (this.envUntracked) return;
+    try {
+      if (!(await this.isTracked(".env"))) {
+        this.envUntracked = true;
+        return;
+      }
+
+      const gitignorePath = path.join(this.repoPath, ".gitignore");
+      let gitignore = "";
+      try {
+        gitignore = await fs.readFile(gitignorePath, "utf-8");
+      } catch {}
+      if (!gitignore.split("\n").some((line) => line.trim() === ".env")) {
+        const prefix = gitignore && !gitignore.endsWith("\n") ? "\n" : "";
+        await fs.writeFile(
+          gitignorePath,
+          `${gitignore}${prefix}.env\n`,
+          "utf-8",
+        );
+      }
+
+      await this.run(["rm", "--cached", "--", ".env"]);
+      await this.run([
+        "commit",
+        "-m",
+        "chore: stop tracking .env to keep secrets out of remotes",
+      ]);
+      this.envUntracked = true;
+      console.log(
+        "Removed .env from git tracking; the file remains on disk and is now gitignored.",
+      );
+    } catch (err) {
+      console.error("Failed to untrack .env:", err);
+    }
+  }
+
   private async exists(p: string): Promise<boolean> {
     try {
       await fs.access(p);
@@ -146,6 +185,7 @@ export class GitService {
   ): Promise<boolean> {
     try {
       await this.init();
+      await this.ensureEnvUntracked();
 
       if (files) {
         const filesArray = Array.isArray(files) ? files : [files];

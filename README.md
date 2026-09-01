@@ -1,5 +1,14 @@
 # LYRA TUI
 
+<div align="center">
+
+[![CI](https://github.com/ILDaviz/lyra-tui/actions/workflows/ci.yml/badge.svg)](https://github.com/ILDaviz/lyra-tui/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Issues](https://img.shields.io/github/issues/ILDaviz/lyra-tui)](https://github.com/ILDaviz/lyra-tui/issues)
+[![Releases](https://img.shields.io/github/v/release/ILDaviz/lyra-tui)](https://github.com/ILDaviz/lyra-tui/releases)
+
+</div>
+
 **Lyra TUI** is a local-first developer workspace for Markdown notes, daily logs, tasks, bookmarks, and a lightweight knowledge graph, built for the terminal.
 
 It keeps the source of truth in ordinary files while providing a focused TUI, an automation-friendly CLI, keyboard-first navigation, and optional Git synchronization.
@@ -111,7 +120,11 @@ bun scripts/seed-demo-data.ts
 LYRA_REPO_PATH="$PWD/lyra_dev" bun run packages/tui/bin/lyra-tui.ts
 ```
 
-The production default vault is `~/.lyra`; development uses `~/.lyra_dev` and tests use `~/.lyra_test`. Set `LYRA_REPO_PATH` to use another vault.
+> [!NOTE]
+> - the production default vault is `~/.lyra`; 
+> - development uses `~/.lyra_dev` 
+> - tests use `~/.lyra_test`. 
+> - set `LYRA_REPO_PATH` to use another vault if needed.
 
 ## Quick Start
 

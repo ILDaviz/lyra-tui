@@ -19,14 +19,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-        matrix:
-          include:
-            - os: macos-latest
-              target: darwin-arm64
-              binary_name: lyra-darwin-arm64
-            - os: ubuntu-latest
-              target: linux-x64
-              binary_name: lyra-linux-x64
+      matrix:
+        include:
+          - os: macos-latest
+            target: darwin-arm64
+            binary_name: lyra-darwin-arm64
+          - os: ubuntu-latest
+            target: linux-x64
+            binary_name: lyra-linux-x64
 
     steps:
       - name: Checkout repository

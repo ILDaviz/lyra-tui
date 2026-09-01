@@ -3,7 +3,13 @@ import { useAppStore } from "../../store";
 import { useRenderer } from "@opentui/react";
 import { useTranslation } from "../../i18n";
 import { listThemes } from "../../theme";
-import { getGitService, saveConfig, getLocalDateString } from "@lyratui/core";
+import {
+  getGitService,
+  saveConfig,
+  getLocalDateString,
+  getConfig,
+  isKeychainAvailable,
+} from "@lyratui/core";
 import { CommandItem, SearchItem, PaletteTab, SearchMode } from "./types";
 
 interface UsePaletteCommandsOptions {
@@ -242,6 +248,30 @@ export function usePaletteCommands({
           setCommandPaletteOpen(false);
         },
       })),
+      {
+        id: "toggle-keychain",
+        title: t(keys.CMD_TOGGLE_KEYCHAIN, {
+          state: getConfig().useKeychain
+            ? t(keys.STATE_ON)
+            : t(keys.STATE_OFF),
+        }),
+        category: t(keys.CAT_SYSTEM),
+        action: async () => {
+          if (!isKeychainAvailable()) {
+            setStatusMessage(t(keys.STATUS_KEYCHAIN_UNAVAILABLE));
+            setCommandPaletteOpen(false);
+            return;
+          }
+          const next = !getConfig().useKeychain;
+          await saveConfig({ useKeychain: next });
+          setStatusMessage(
+            t(keys.STATUS_KEYCHAIN_SET, {
+              state: next ? t(keys.STATE_ON) : t(keys.STATE_OFF),
+            }),
+          );
+          setCommandPaletteOpen(false);
+        },
+      },
       ...folders.map((f) => ({
         id: `goto-folder-${f}`,
         title: t(keys.CMD_GOTO_FOLDER, {

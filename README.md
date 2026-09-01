@@ -2,10 +2,15 @@
 
 <div align="center">
 
-[![CI](https://github.com/ILDaviz/lyra-tui/actions/workflows/ci.yml/badge.svg)](https://github.com/ILDaviz/lyra-tui/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Issues](https://img.shields.io/github/issues/ILDaviz/lyra-tui)](https://github.com/ILDaviz/lyra-tui/issues)
-[![Releases](https://img.shields.io/github/v/release/ILDaviz/lyra-tui)](https://github.com/ILDaviz/lyra-tui/releases)
+[Workflow](#the-developer-workflow) ·
+[Features](#features) ·
+[Installation](#installation) ·
+[Quick Start](#quick-start) ·
+[CLI Examples](#cli-examples) ·
+[Skills](#documentation-skills) ·
+[Themes](#themes-and-languages) ·
+[Development](#development) ·
+[License](#license)
 
 </div>
 
@@ -22,6 +27,16 @@ It keeps the source of truth in ordinary files while providing a focused TUI, an
 > [!WARNING]
 > **Project Status: Beta / Hobby Project**
 > Lyra TUI is a hobby project maintained in spare time. Features and APIs may evolve rapidly. Bug reports, feature suggestions, and contributions are welcome.
+
+## Installation
+
+Download and install the self-contained executable for Linux or macOS:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ILDaviz/lyra-tui/master/install.sh | bash
+```
+
+Then jump to [Quick Start](#quick-start).
 
 ## The Developer Workflow
 
@@ -101,13 +116,7 @@ AI is an optional enhancement for local semantic search, editor assistance, and 
 - Optionally, run **Toggle Keychain Storage** in the command palette to store secrets in the operating system keychain instead: macOS Keychain, the freedesktop Secret Service (GNOME Keyring, KDE Wallet) on Linux, or the Windows Password Vault. Enabling it moves existing secrets out of `.env` automatically; if a keychain write fails, the value falls back to `.env` so nothing is lost.
 - If you ever pushed your vault before `.env` was excluded, or committed secrets manually, those keys remain in the remote Git history: **rotate them**.
 
-## Installation
-
-Download and install the self-contained executable for Linux or macOS:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/ILDaviz/lyra-tui/master/install.sh | bash
-```
+## Development
 
 For local development from this repository:
 

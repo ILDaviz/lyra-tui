@@ -19,17 +19,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - os: macos-latest
-            target: darwin-arm64
-            binary_name: lyra-darwin-arm64
-          - os: ubuntu-latest
-            target: linux-x64
-            binary_name: lyra-linux-x64
-          - os: windows-latest
-            target: windows-x64
-            binary_name: lyra-windows-x64.exe
+        matrix:
+          include:
+            - os: macos-latest
+              target: darwin-arm64
+              binary_name: lyra-darwin-arm64
+            - os: ubuntu-latest
+              target: linux-x64
+              binary_name: lyra-linux-x64
 
     steps:
       - name: Checkout repository
@@ -44,7 +41,6 @@ jobs:
         run: bun install
 
       - name: Run tests
-        if: matrix.os != 'windows-latest'
         run: bun run test
 
       - name: Compile standalone binary

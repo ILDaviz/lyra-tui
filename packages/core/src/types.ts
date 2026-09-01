@@ -113,6 +113,7 @@ export interface AppConfig {
   aiGatewayKey?: string;
   ollamaUrl?: string;
   ollamaModel?: string;
+  useKeychain?: boolean;
 }
 
 export interface RagOptions {

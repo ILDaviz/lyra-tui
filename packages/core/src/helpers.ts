@@ -4,6 +4,7 @@ import * as fs from "fs/promises";
 import * as fsSync from "fs";
 import { GitService } from "./git-service";
 import { EmbeddingService } from "./services";
+import { getSecret, isKeychainAvailable, setSecret } from "./secret-store";
 import { AppConfig } from "./types";
 
 let gitService: GitService | null = null;
@@ -184,6 +185,15 @@ function ensureConfigLoadedSync(): void {
         console.error("Failed to read .env secrets:", envErr);
       }
     }
+
+    if (appConfig.useKeychain && isKeychainAvailable()) {
+      for (const [envKey, configKey] of Object.entries(SECRET_ENV_KEYS)) {
+        const value = getSecret(envKey);
+        if (value) {
+          (appConfig as Record<string, unknown>)[configKey] = value;
+        }
+      }
+    }
   } catch (err) {
     console.error("Failed to load config synchronously:", err);
   }
@@ -267,7 +277,19 @@ async function saveSecrets(
   for (const key of Object.keys(SECRET_ENV_KEYS)) {
     delete merged[key];
   }
-  Object.assign(merged, secrets);
+
+  if (appConfig.useKeychain && isKeychainAvailable()) {
+    const fallback: Record<string, string> = {};
+    for (const [key, value] of Object.entries(secrets)) {
+      if (!setSecret(key, value)) {
+        fallback[key] = value;
+      }
+    }
+    Object.assign(merged, fallback);
+  } else {
+    Object.assign(merged, secrets);
+  }
+
   const lines = Object.entries(merged).map(([key, value]) => `${key}=${value}`);
   await fs.writeFile(envPath, `${lines.join("\n")}\n`, "utf-8");
 

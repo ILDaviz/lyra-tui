@@ -6,3 +6,4 @@ export * from "./services";
 export * from "./ai";
 export * from "./logger";
 export * from "./cli";
+export * from "./secret-store";

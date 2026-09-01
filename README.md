@@ -97,12 +97,17 @@ AI is an optional enhancement for local semantic search, editor assistance, and 
 Download and install the self-contained executable for Linux or macOS:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ILDaviz/lyra-tui/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ILDaviz/lyra-tui/master/install.sh | bash
 ```
 
 For local development from this repository:
 
 ```bash
+# Optional: populate lyra_dev/ with realistic demo data
+# (~9,200 notes across 6 folders, 10 years of daily logs, 8,000 bookmarks).
+# Warning: it deletes and regenerates lyra_dev/ from scratch.
+bun scripts/seed-demo-data.ts
+
 LYRA_REPO_PATH="$PWD/lyra_dev" bun run packages/tui/bin/lyra-tui.ts
 ```
 
@@ -180,8 +185,8 @@ Change the theme or language from the Command Palette with `Ctrl+P`.
 > **Known Limitations**
 > - **Platforms:** Linux and macOS, with a true-color terminal.
 > - **Vault scale:** developed and tested on ~10k-note vaults; comfortable up to ~30–50k notes. Startup stays fast at any size (data loads in the background), but scans and caches grow linearly with vault size.
-> - **AI storage:** with optional AI enabled, `.lyra/embeddings.json` grows by roughly 25 KB per note; the local embedding model is downloaded on first use and cached in `.lyra/models`.
-> - **Caches:** `.lyra/scan-cache.json` and `.lyra/embeddings.json` are plain JSON files and can be safely deleted — they are rebuilt automatically.
+> - **AI storage:** with optional AI enabled, the RAG index `.lyra/embeddings.db` (SQLite) grows by a few KB per note; the local embedding model is downloaded on first use and cached in `.lyra/models`.
+> - **Caches:** `.lyra/scan-cache.json` and `.lyra/embeddings.db` can be safely deleted — they are rebuilt automatically. A legacy `.lyra/embeddings.json` is migrated to SQLite on first launch and parked as `embeddings.json.bak`.
 
 ## License
 

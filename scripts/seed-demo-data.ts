@@ -34,6 +34,19 @@ function randSample<T>(arr: readonly T[], count: number): T[] {
   return result;
 }
 
+function pickRandom<T>(arr: readonly T[], count: number): T[] {
+  const n = arr.length;
+  const c = Math.min(count, n);
+  if (c === 0) return [];
+  const seen = new Set<number>();
+  while (seen.size < c) {
+    seen.add(Math.floor(rng() * n));
+  }
+  const result: T[] = [];
+  for (const idx of seen) result.push(arr[idx]);
+  return result;
+}
+
 const AI_DOMAINS = [
   "Transformer Architecture", "RAG Pipeline", "Vector Search Index", "LoRA Fine-Tuning",
   "Triton Kernel", "CUDA Memory Allocator", "vLLM Engine", "Quantization AWQ",
@@ -96,6 +109,12 @@ const FOLDERS = [
   { name: "Learning-and-Research", domains: LEARNING_DOMAINS, prefix: "RES" },
 ];
 
+const ROOT_NOTE_COUNT = 2_000;
+const NOTES_PER_FOLDER = 1_200;
+const TOTAL_LINKS = 8_000;
+const CHUNK_SIZE = 500;
+const FOLDER_KEYS = ["", ...FOLDERS.map(f => f.name)];
+
 const URL_DOMAINS = [
   "https://github.com", "https://docs.rs", "https://huggingface.co", "https://arxiv.org",
   "https://cloud.google.com/docs", "https://aws.amazon.com/blogs", "https://kubernetes.io/docs",
@@ -128,6 +147,7 @@ async function main() {
   const rootTarget = path.join(process.cwd(), "lyra_dev");
   console.log(`[Seed] Target directory: ${rootTarget}`);
 
+  await fs.rm(rootTarget, { recursive: true, force: true });
   await fs.mkdir(rootTarget, { recursive: true });
   await fs.mkdir(path.join(rootTarget, "myday"), { recursive: true });
   await fs.mkdir(path.join(rootTarget, ".lyra"), { recursive: true });
@@ -136,11 +156,11 @@ async function main() {
     await fs.mkdir(path.join(rootTarget, f.name), { recursive: true });
   }
 
-  console.log("[Seed] Generating metadata for 7,000+ notes...");
+  console.log(`[Seed] Generating metadata for ${ROOT_NOTE_COUNT + NOTES_PER_FOLDER * FOLDERS.length} notes...`);
   const allNotes: GeneratedNoteMeta[] = [];
 
   // Root notes
-  for (let i = 1; i <= 1000; i++) {
+  for (let i = 1; i <= ROOT_NOTE_COUNT; i++) {
     const domain = randChoice(ROOT_DOMAINS);
     const slug = `${domain.replace(/\s+/g, "-")}-${i}`;
     const title = `${domain}: System Specification ${i}`;
@@ -156,7 +176,7 @@ async function main() {
 
   // Folder notes
   for (const folder of FOLDERS) {
-    for (let i = 1; i <= 1000; i++) {
+    for (let i = 1; i <= NOTES_PER_FOLDER; i++) {
       const domain = randChoice(folder.domains);
       const slug = `${folder.prefix}-${domain.replace(/\s+/g, "-")}-${i}`;
       const title = `${domain} Reference & Design Doc ${i}`;
@@ -174,15 +194,34 @@ async function main() {
   console.log(`[Seed] Total notes to write: ${allNotes.length}`);
 
   console.log("[Seed] Generating content and cross-link graph for notes...");
-  const noteContentMap = new Map<string, string>();
+  const notesByFolder = new Map<string, GeneratedNoteMeta[]>();
+  for (const n of allNotes) {
+    const arr = notesByFolder.get(n.folder);
+    if (arr) arr.push(n);
+    else notesByFolder.set(n.folder, [n]);
+  }
+
+  let notesWritten = 0;
+  let pending: { filePath: string; content: string }[] = [];
+  const flushNotes = async () => {
+    await Promise.all(pending.map(f => fs.writeFile(f.filePath, f.content, "utf-8")));
+    notesWritten += pending.length;
+    pending = [];
+    process.stdout.write(`\r[Seed] Written ${notesWritten} / ${allNotes.length} notes`);
+  };
 
   for (let i = 0; i < allNotes.length; i++) {
     const note = allNotes[i];
     const wikilinkTargets: GeneratedNoteMeta[] = [];
-    const sameCategoryNotes = allNotes.filter(n => n.folder === note.folder && n.filename !== note.filename);
-    wikilinkTargets.push(...randSample(sameCategoryNotes, randInt(2, 4)));
-    const otherCategoryNotes = allNotes.filter(n => n.folder !== note.folder);
-    wikilinkTargets.push(...randSample(otherCategoryNotes, randInt(2, 4)));
+    const sameCategoryNotes = notesByFolder.get(note.folder) ?? [];
+    wikilinkTargets.push(...pickRandom(sameCategoryNotes, randInt(2, 5)).filter(n => n.filename !== note.filename));
+    const otherFolders = FOLDER_KEYS.filter(k => k !== note.folder);
+    wikilinkTargets.push(
+      ...randSample(otherFolders, randInt(2, 4)).map(fk => {
+        const arr = notesByFolder.get(fk)!;
+        return arr[Math.floor(rng() * arr.length)];
+      })
+    );
 
     const wikilinkLines = wikilinkTargets.map((target, idx) => {
       const targetRef = target.folder ? `${target.folder}/${target.filename.replace(/\.md$/, "")}` : target.filename.replace(/\.md$/, "");
@@ -257,21 +296,16 @@ ${wikilinkLines}
 `;
 
     const fullPath = note.folder ? path.join(rootTarget, note.folder, note.filename) : path.join(rootTarget, note.filename);
-    noteContentMap.set(fullPath, content);
+    pending.push({ filePath: fullPath, content });
+    if (pending.length >= CHUNK_SIZE) {
+      await flushNotes();
+    }
   }
-
-  console.log("[Seed] Writing 7,000 note files to disk...");
-  const noteEntries = Array.from(noteContentMap.entries());
-  const CHUNK_SIZE = 500;
-  for (let i = 0; i < noteEntries.length; i += CHUNK_SIZE) {
-    const chunk = noteEntries.slice(i, i + CHUNK_SIZE);
-    await Promise.all(chunk.map(([filePath, content]) => fs.writeFile(filePath, content, "utf-8")));
-    process.stdout.write(`\r[Seed] Written ${Math.min(i + CHUNK_SIZE, noteEntries.length)} / ${noteEntries.length} notes`);
-  }
+  await flushNotes();
   console.log("\n[Seed] Notes write complete!");
 
-  console.log("[Seed] Generating 5 years of daily logs in myday/...");
-  const startDate = new Date(2021, 8, 1);
+  console.log("[Seed] Generating 10 years of daily logs in myday/...");
+  const startDate = new Date(2016, 8, 1);
   const endDate = new Date(2026, 7, 30);
   const dailyLogs: { dateStr: string; content: string }[] = [];
 
@@ -286,7 +320,7 @@ ${wikilinkLines}
       const day = String(curr.getDate()).padStart(2, "0");
       const dateStr = `${year}-${month}-${day}`;
 
-      const relatedNotes = randSample(allNotes, randInt(2, 4));
+      const relatedNotes = pickRandom(allNotes, randInt(2, 4));
       const wikilinks = relatedNotes.map(n => {
         const ref = n.folder ? `${n.folder}/${n.filename.replace(/\.md$/, "")}` : n.filename.replace(/\.md$/, "");
         return `[[${ref}]]`;
@@ -341,11 +375,9 @@ ${wrapUpTopics.join("\n")}
   }
   console.log("\n[Seed] Daily logs write complete!");
 
-  console.log("[Seed] Generating 10,000+ bookmarks in links.json...");
-  const manualLinks: any[] = [];
-  const TOTAL_LINKS = 10250;
+  console.log(`[Seed] Generating ${TOTAL_LINKS} bookmarks in links.json...`);
 
-  const startTimestamp = new Date(2021, 8, 1).getTime();
+  const startTimestamp = new Date(2016, 8, 1).getTime();
   const endTimestamp = new Date(2026, 7, 30).getTime();
   const timeStep = (endTimestamp - startTimestamp) / TOTAL_LINKS;
 
@@ -366,6 +398,22 @@ ${wrapUpTopics.join("\n")}
     { domain: "https://redis.io/docs/data-types", category: "Redis In-Memory Data Structures", tagPrefix: ["cache", "redis"] }
   ];
 
+  const linksPath = path.join(rootTarget, "links.json");
+  const linksHandle = await fs.open(linksPath, "w");
+  await linksHandle.write("[\n");
+  const LINK_CHUNK_SIZE = 2000;
+  let linkChunk: string[] = [];
+  let linksWritten = 0;
+  let firstLinkChunk = true;
+  const flushLinks = async () => {
+    if (linkChunk.length === 0) return;
+    await linksHandle.write((firstLinkChunk ? "" : ",\n") + linkChunk.join(",\n"));
+    firstLinkChunk = false;
+    linksWritten += linkChunk.length;
+    linkChunk = [];
+    process.stdout.write(`\r[Seed] Written ${linksWritten} / ${TOTAL_LINKS} bookmarks`);
+  };
+
   for (let i = 1; i <= TOTAL_LINKS; i++) {
     const topic = randChoice(LINK_TOPICS);
     const techTerm = randChoice([...AI_DOMAINS, ...ARCH_DOMAINS, ...INFRA_DOMAINS, ...BACKEND_DOMAINS, ...SECURITY_DOMAINS]);
@@ -376,19 +424,25 @@ ${wrapUpTopics.join("\n")}
     const tags = Array.from(new Set([...topic.tagPrefix, ...randSample(TECH_TAGS, randInt(2, 4))]));
     const createdAt = Math.floor(startTimestamp + (i * timeStep) + randInt(-3600000, 3600000));
 
-    manualLinks.push({
-      id: `manual-link-${i}-${Math.random().toString(36).substring(2, 8)}`,
-      url,
-      title,
-      description,
-      tags,
-      createdAt,
-      isManual: true,
-    });
+    linkChunk.push(
+      JSON.stringify({
+        id: `manual-link-${i}-${Math.random().toString(36).substring(2, 8)}`,
+        url,
+        title,
+        description,
+        tags,
+        createdAt,
+        isManual: true,
+      })
+    );
+    if (linkChunk.length >= LINK_CHUNK_SIZE) {
+      await flushLinks();
+    }
   }
-
-  console.log(`[Seed] Writing links.json with ${manualLinks.length} entries...`);
-  await fs.writeFile(path.join(rootTarget, "links.json"), JSON.stringify(manualLinks, null, 2), "utf-8");
+  await flushLinks();
+  await linksHandle.write("\n]");
+  await linksHandle.close();
+  console.log(`\n[Seed] links.json complete: ${linksWritten} bookmarks.`);
 
   const configContent = {
     theme: "nord",
@@ -402,10 +456,10 @@ ${wrapUpTopics.join("\n")}
 
   console.log("\n=======================================================");
   console.log("✅ Lyra Demo Data Generation Successfully Completed!");
-  console.log(`📁 Root Memos: 1,000 notes`);
-  console.log(`📁 6 Category Folders: 6,000 notes (1,000 per folder)`);
-  console.log(`📅 Daily Logs (myday): ${dailyLogs.length} logs (5 years: 2021-2026)`);
-  console.log(`🔗 Links (links.json): ${manualLinks.length} saved bookmarks`);
+  console.log(`📁 Root Memos: ${ROOT_NOTE_COUNT.toLocaleString("en-US")} notes`);
+  console.log(`📁 ${FOLDERS.length} Category Folders: ${(NOTES_PER_FOLDER * FOLDERS.length).toLocaleString("en-US")} notes (${NOTES_PER_FOLDER.toLocaleString("en-US")} per folder)`);
+  console.log(`📅 Daily Logs (myday): ${dailyLogs.length} logs (10 years: 2016-2026)`);
+  console.log(`🔗 Links (links.json): ${linksWritten} saved bookmarks`);
   console.log("=======================================================\n");
 }
 

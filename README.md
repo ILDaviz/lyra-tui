@@ -80,11 +80,17 @@ Daily Log -> Todo -> Note or Memo -> Link -> Git history
 
 - Note, task, folder, and bookmark changes can be committed with meaningful messages when the vault is a Git repository.
 - Pull, push, full synchronization, and an optional foreground sync scheduler.
-- During Git initialization Lyra adds generated `.lyra/` data to `.gitignore`, and saving configuration adds `.env`; already tracked files are not removed automatically.
+- During Git initialization Lyra adds generated `.lyra/` data to `.gitignore`, and saving configuration adds `.env`. If `.env` was already tracked (for example in a pre-existing vault repository), Lyra automatically removes it from the index on the next commit and keeps the file on disk.
 
 ### Optional AI
 
 AI is an optional enhancement for local semantic search, editor assistance, and bookmark autofill. Lyra supports local embeddings and multiple providers, but the core Markdown, Daily Log, todo, link, and graph workflow works without AI.
+
+### Secrets And Keychain
+
+- API keys and provider settings marked as secrets are stored in `.env` inside the vault, which Lyra always keeps out of Git.
+- Optionally, run **Toggle Keychain Storage** in the command palette to store secrets in the operating system keychain instead: macOS Keychain, the freedesktop Secret Service (GNOME Keyring, KDE Wallet) on Linux, or the Windows Password Vault. Enabling it moves existing secrets out of `.env` automatically; if a keychain write fails, the value falls back to `.env` so nothing is lost.
+- If you ever pushed your vault before `.env` was excluded, or committed secrets manually, those keys remain in the remote Git history: **rotate them**.
 
 ## Installation
 

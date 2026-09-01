@@ -91,6 +91,35 @@ fi
 
 chmod +x "$TMP_FILE"
 
+echo -e "Verifying SHA256 checksum..."
+
+CHECKSUMS_URL="${GITHUB_URL}/releases/latest/download/SHA256SUMS.txt"
+TMP_CHECKSUMS="${TMP_DIR}/SHA256SUMS.txt"
+if command -v sha256sum >/dev/null 2>&1; then
+  SHASUM_CMD="sha256sum"
+elif command -v shasum >/dev/null 2>&1; then
+  SHASUM_CMD="shasum -a 256"
+else
+  echo -e "${RED}Error: sha256sum or shasum is required to verify the download.${NC}"
+  rm -rf "$TMP_DIR"
+  exit 1
+fi
+
+if curl -fsSL "$CHECKSUMS_URL" -o "$TMP_CHECKSUMS" || wget -q "$CHECKSUMS_URL" -O "$TMP_CHECKSUMS"; then
+  EXPECTED_HASH="$(grep " ${BINARY_NAME}\$" "$TMP_CHECKSUMS" | awk '{print $1}')"
+  ACTUAL_HASH="$($SHASUM_CMD "$TMP_FILE" | awk '{print $1}')"
+  if [ -z "$EXPECTED_HASH" ] || [ "$EXPECTED_HASH" != "$ACTUAL_HASH" ]; then
+    echo -e "${RED}Error: SHA256 checksum mismatch for ${BINARY_NAME}.${NC}"
+    echo "Expected: ${EXPECTED_HASH:-<not found in SHA256SUMS.txt>}"
+    echo "Actual:   ${ACTUAL_HASH}"
+    rm -rf "$TMP_DIR"
+    exit 1
+  fi
+  echo -e "Checksum OK: ${GREEN}${ACTUAL_HASH}${NC}"
+else
+  echo -e "${YELLOW}Warning: could not download SHA256SUMS.txt; skipping checksum verification.${NC}"
+fi
+
 echo -e "Installing to ${BOLD}${TARGET}${NC}..."
 
 if [ -w "$INSTALL_DIR" ]; then

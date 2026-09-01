@@ -78,9 +78,10 @@ describe("Helpers", () => {
   });
 
   it("should initialize logger and write to .lyra/logs/lyra-{date}.log", async () => {
-    const { initTuiLogging } = await import("../src/logger");
+    const { initTuiLogging, flushLogsSync } = await import("../src/logger");
     initTuiLogging();
     console.log("Testing logger output");
+    flushLogsSync();
 
     const logsDir = path.join(getRepoPath(), ".lyra", "logs");
     const logFile = path.join(logsDir, `lyra-${getLocalDateString()}.log`);

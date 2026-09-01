@@ -30,10 +30,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: latest
 
@@ -56,7 +56,7 @@ jobs:
           bun build --compile --minify --production packages/tui/bin/lyra-tui.ts --define 'process.env.LYRA_VERSION=${{ toJSON(github.event.release.tag_name || inputs.tag_name || github.ref_name) }}' --define 'process.env.OPENTUI_LIBC="glibc"' --outfile dist/${{ matrix.binary_name }}
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ matrix.binary_name }}
           path: dist/${{ matrix.binary_name }}
@@ -70,7 +70,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: dist
           merge-multiple: true
@@ -81,7 +81,7 @@ jobs:
           sha256sum lyra-* > SHA256SUMS.txt
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           tag_name: ${{ github.event.release.tag_name || inputs.tag_name || github.ref_name }}
           files: |

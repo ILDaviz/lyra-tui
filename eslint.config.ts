@@ -35,6 +35,7 @@ export default defineConfig([
             "vitest.config.ts",
             "eslint.config.ts",
             "commitlint.config.ts",
+            "scripts/seed-demo-data.ts",
           ],
         },
         tsconfigRootDir: __dirname,

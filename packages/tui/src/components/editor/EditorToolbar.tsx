@@ -10,7 +10,7 @@ export function EditorToolbar(): any {
     <box flexDirection="row" alignItems="center" marginTop={1}>
       <text fg={theme.text.dim}>
         <span fg={theme.accent.secondary}>[^B]</span>{" "}
-        {t(keys.EDITOR_TOOLBAR_BOLD)}         <span fg={theme.accent.cyan}>[^W]</span>{" "}
+        {t(keys.EDITOR_TOOLBAR_BOLD)} <span fg={theme.accent.cyan}>[^W]</span>{" "}
         {t(keys.EDITOR_TOOLBAR_WIKILINK)}{" "}
         <span fg={theme.accent.green}>[^O]</span>{" "}
         {t(keys.EDITOR_TOOLBAR_ATTACH)}{" "}

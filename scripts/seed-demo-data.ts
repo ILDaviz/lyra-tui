@@ -48,56 +48,152 @@ function pickRandom<T>(arr: readonly T[], count: number): T[] {
 }
 
 const AI_DOMAINS = [
-  "Transformer Architecture", "RAG Pipeline", "Vector Search Index", "LoRA Fine-Tuning",
-  "Triton Kernel", "CUDA Memory Allocator", "vLLM Engine", "Quantization AWQ",
-  "Embedding Distillation", "Attention Mechanism", "FlashAttention v2", "TensorRT Optimization",
-  "LLM Agent Orchestrator", "Prompt Engineering Evaluation", "Mixture of Experts", "KV Cache Management",
-  "Speculative Decoding", "Context Window Extension", "Cross-Encoder Reranker", "Semantic Cache",
-  "Synthetic Data Pipeline", "Safety Alignment DPO", "Tokenization BPE", "Embedding Clustering"
+  "Transformer Architecture",
+  "RAG Pipeline",
+  "Vector Search Index",
+  "LoRA Fine-Tuning",
+  "Triton Kernel",
+  "CUDA Memory Allocator",
+  "vLLM Engine",
+  "Quantization AWQ",
+  "Embedding Distillation",
+  "Attention Mechanism",
+  "FlashAttention v2",
+  "TensorRT Optimization",
+  "LLM Agent Orchestrator",
+  "Prompt Engineering Evaluation",
+  "Mixture of Experts",
+  "KV Cache Management",
+  "Speculative Decoding",
+  "Context Window Extension",
+  "Cross-Encoder Reranker",
+  "Semantic Cache",
+  "Synthetic Data Pipeline",
+  "Safety Alignment DPO",
+  "Tokenization BPE",
+  "Embedding Clustering",
 ];
 
 const ARCH_DOMAINS = [
-  "Distributed Consensus", "Raft State Machine", "Event Sourcing Store", "CQRS Query Engine",
-  "Database Sharding Router", "Distributed Transaction Saga", "API Gateway Proxy", "Rate Limiting Algorithm",
-  "Cache Invalidation Strategy", "Circuit Breaker Pattern", "Outbox Pattern Publisher", "Service Mesh Topology",
-  "Global Multi-Region Sync", "Zero-Copy IPC Buffer", "Consistent Hashing Ring", "Idempotency Key Manager",
-  "Read-Through Cache", "Columnar Storage Index", "LSM Tree Compaction", "Partition Pruning Engine"
+  "Distributed Consensus",
+  "Raft State Machine",
+  "Event Sourcing Store",
+  "CQRS Query Engine",
+  "Database Sharding Router",
+  "Distributed Transaction Saga",
+  "API Gateway Proxy",
+  "Rate Limiting Algorithm",
+  "Cache Invalidation Strategy",
+  "Circuit Breaker Pattern",
+  "Outbox Pattern Publisher",
+  "Service Mesh Topology",
+  "Global Multi-Region Sync",
+  "Zero-Copy IPC Buffer",
+  "Consistent Hashing Ring",
+  "Idempotency Key Manager",
+  "Read-Through Cache",
+  "Columnar Storage Index",
+  "LSM Tree Compaction",
+  "Partition Pruning Engine",
 ];
 
 const INFRA_DOMAINS = [
-  "Kubernetes Custom Controller", "Helm Release Orchestration", "Terraform Provider State", "ArgoCD GitOps Pipeline",
-  "eBPF Network Observability", "Prometheus Metrics Scraper", "Grafana Dashboard Generator", "KEDA Autoscaler Rule",
-  "Linux Kernel TCP Tuning", "Ceph Block Storage Pool", "Cilium CNI Router", "Envoy Filter Chain",
-  "CoreDNS Resolution Policy", "Vector Log Collector", "OpenTelemetry Trace Exporter", "Jaeger Distributed Tracing",
-  "Harbor Container Registry", "Vault Secret Lease Manager", "WireGuard Mesh Tunnel", "BGP Peering Gateway"
+  "Kubernetes Custom Controller",
+  "Helm Release Orchestration",
+  "Terraform Provider State",
+  "ArgoCD GitOps Pipeline",
+  "eBPF Network Observability",
+  "Prometheus Metrics Scraper",
+  "Grafana Dashboard Generator",
+  "KEDA Autoscaler Rule",
+  "Linux Kernel TCP Tuning",
+  "Ceph Block Storage Pool",
+  "Cilium CNI Router",
+  "Envoy Filter Chain",
+  "CoreDNS Resolution Policy",
+  "Vector Log Collector",
+  "OpenTelemetry Trace Exporter",
+  "Jaeger Distributed Tracing",
+  "Harbor Container Registry",
+  "Vault Secret Lease Manager",
+  "WireGuard Mesh Tunnel",
+  "BGP Peering Gateway",
 ];
 
 const BACKEND_DOMAINS = [
-  "Tokio Async Runtime", "Rust Memory Allocator", "Go Concurrency Pool", "PostgreSQL Index Optimizer",
-  "Postgres Connection Pooler", "Redis Cluster Shard", "Kafka Partition Consumer", "NATS JetStream Stream",
-  "gRPC Protocol Buffer", "GraphQL Schema Federation", "gRPC Streaming Pipeline", "HTTP3 QUIC Connection",
-  "Deadlock Detection System", "WAL Archive Streamer", "Zero-Copy JSON Parser", "Distributed Lock Lease",
-  "SSE Notification Gateway", "WebSocket PubSub Hub", "SIMD Vectorized Parser", "DuckDB Analytical Worker"
+  "Tokio Async Runtime",
+  "Rust Memory Allocator",
+  "Go Concurrency Pool",
+  "PostgreSQL Index Optimizer",
+  "Postgres Connection Pooler",
+  "Redis Cluster Shard",
+  "Kafka Partition Consumer",
+  "NATS JetStream Stream",
+  "gRPC Protocol Buffer",
+  "GraphQL Schema Federation",
+  "gRPC Streaming Pipeline",
+  "HTTP3 QUIC Connection",
+  "Deadlock Detection System",
+  "WAL Archive Streamer",
+  "Zero-Copy JSON Parser",
+  "Distributed Lock Lease",
+  "SSE Notification Gateway",
+  "WebSocket PubSub Hub",
+  "SIMD Vectorized Parser",
+  "DuckDB Analytical Worker",
 ];
 
 const SECURITY_DOMAINS = [
-  "Zero Trust Architecture", "OAuth2 PKCE Flow", "OIDC Token Validator", "mTLS Certificate Authority",
-  "KMS Key Rotation Worker", "SAST Security Gate", "DAST Penetration Suite", "RBAC Permission Matrix",
-  "ABAC Policy Engine", "SOC2 Compliance Audit", "GDPR Data Redaction", "Incident Response Playbook",
-  "Secret Detection Scanner", "Vulnerability CVE Watcher", "Hardware Security Module", "Audit Log Cryptographic Chain"
+  "Zero Trust Architecture",
+  "OAuth2 PKCE Flow",
+  "OIDC Token Validator",
+  "mTLS Certificate Authority",
+  "KMS Key Rotation Worker",
+  "SAST Security Gate",
+  "DAST Penetration Suite",
+  "RBAC Permission Matrix",
+  "ABAC Policy Engine",
+  "SOC2 Compliance Audit",
+  "GDPR Data Redaction",
+  "Incident Response Playbook",
+  "Secret Detection Scanner",
+  "Vulnerability CVE Watcher",
+  "Hardware Security Module",
+  "Audit Log Cryptographic Chain",
 ];
 
 const LEARNING_DOMAINS = [
-  "Formal Verification TLA+", "Compiler Optimization Passes", "WebAssembly Memory Sandbox", "Custom JIT Compiler",
-  "LSM vs B-Tree Benchmarks", "Lock-Free Ring Buffer", "CRDT State-Based Sync", "Distributed Snapshot Algorithm",
-  "Vectorized Execution Engine", "Cache-Conscious Data Structure", "Branch Predictor Tuning", "Memory Ordering Barriers"
+  "Formal Verification TLA+",
+  "Compiler Optimization Passes",
+  "WebAssembly Memory Sandbox",
+  "Custom JIT Compiler",
+  "LSM vs B-Tree Benchmarks",
+  "Lock-Free Ring Buffer",
+  "CRDT State-Based Sync",
+  "Distributed Snapshot Algorithm",
+  "Vectorized Execution Engine",
+  "Cache-Conscious Data Structure",
+  "Branch Predictor Tuning",
+  "Memory Ordering Barriers",
 ];
 
 const ROOT_DOMAINS = [
-  "Engineering Roadmap", "System Architecture Blueprint", "Service Catalog Index", "Developer Dashboard",
-  "Sprint Planning Log", "Engineering Quality Standards", "Quarterly Retrospective", "Cross-Team API Contracts",
-  "Incident Postmortem Archive", "Tech Debt Triage Index", "Observability Strategy Guide", "Platform Reliability Goals",
-  "Design Review Guidelines", "Tooling Evaluation Framework", "Capacity Planning Model", "Engineering Growth Matrix"
+  "Engineering Roadmap",
+  "System Architecture Blueprint",
+  "Service Catalog Index",
+  "Developer Dashboard",
+  "Sprint Planning Log",
+  "Engineering Quality Standards",
+  "Quarterly Retrospective",
+  "Cross-Team API Contracts",
+  "Incident Postmortem Archive",
+  "Tech Debt Triage Index",
+  "Observability Strategy Guide",
+  "Platform Reliability Goals",
+  "Design Review Guidelines",
+  "Tooling Evaluation Framework",
+  "Capacity Planning Model",
+  "Engineering Growth Matrix",
 ];
 
 const FOLDERS = [
@@ -113,26 +209,82 @@ const ROOT_NOTE_COUNT = 2_000;
 const NOTES_PER_FOLDER = 1_200;
 const TOTAL_LINKS = 8_000;
 const CHUNK_SIZE = 500;
-const FOLDER_KEYS = ["", ...FOLDERS.map(f => f.name)];
+const FOLDER_KEYS = ["", ...FOLDERS.map((f) => f.name)];
 
 const URL_DOMAINS = [
-  "https://github.com", "https://docs.rs", "https://huggingface.co", "https://arxiv.org",
-  "https://cloud.google.com/docs", "https://aws.amazon.com/blogs", "https://kubernetes.io/docs",
-  "https://opentelemetry.io/docs", "https://prometheus.io/docs", "https://grafana.com/docs",
-  "https://postgresql.org/docs", "https://redis.io/docs", "https://sqlite.org/docs.html",
-  "https://kafka.apache.org/documentation", "https://nats.io/docs", "https://typescriptlang.org/docs",
-  "https://bun.sh/docs", "https://rust-lang.org/learn", "https://go.dev/doc", "https://developer.mozilla.org/en-US/docs",
-  "https://rfc-editor.org/rfc", "https://martinfowler.com/articles", "https://12factor.net",
-  "https://pytorch.org/docs", "https://triton-lang.org/main", "https://vllm.ai/docs"
+  "https://github.com",
+  "https://docs.rs",
+  "https://huggingface.co",
+  "https://arxiv.org",
+  "https://cloud.google.com/docs",
+  "https://aws.amazon.com/blogs",
+  "https://kubernetes.io/docs",
+  "https://opentelemetry.io/docs",
+  "https://prometheus.io/docs",
+  "https://grafana.com/docs",
+  "https://postgresql.org/docs",
+  "https://redis.io/docs",
+  "https://sqlite.org/docs.html",
+  "https://kafka.apache.org/documentation",
+  "https://nats.io/docs",
+  "https://typescriptlang.org/docs",
+  "https://bun.sh/docs",
+  "https://rust-lang.org/learn",
+  "https://go.dev/doc",
+  "https://developer.mozilla.org/en-US/docs",
+  "https://rfc-editor.org/rfc",
+  "https://martinfowler.com/articles",
+  "https://12factor.net",
+  "https://pytorch.org/docs",
+  "https://triton-lang.org/main",
+  "https://vllm.ai/docs",
 ];
 
 const TECH_TAGS = [
-  "ai", "llm", "rag", "vector-search", "cuda", "vllm", "quantization", "embedding",
-  "architecture", "distributed-systems", "raft", "cqrs", "event-sourcing", "consensus",
-  "infra", "kubernetes", "helm", "terraform", "ebpf", "observability", "prometheus",
-  "backend", "rust", "go", "typescript", "postgres", "redis", "kafka", "grpc", "graphql",
-  "security", "zero-trust", "oauth2", "kms", "soc2", "audit", "compliance",
-  "learning", "paper", "research", "tla+", "compiler", "algorithms", "performance"
+  "ai",
+  "llm",
+  "rag",
+  "vector-search",
+  "cuda",
+  "vllm",
+  "quantization",
+  "embedding",
+  "architecture",
+  "distributed-systems",
+  "raft",
+  "cqrs",
+  "event-sourcing",
+  "consensus",
+  "infra",
+  "kubernetes",
+  "helm",
+  "terraform",
+  "ebpf",
+  "observability",
+  "prometheus",
+  "backend",
+  "rust",
+  "go",
+  "typescript",
+  "postgres",
+  "redis",
+  "kafka",
+  "grpc",
+  "graphql",
+  "security",
+  "zero-trust",
+  "oauth2",
+  "kms",
+  "soc2",
+  "audit",
+  "compliance",
+  "learning",
+  "paper",
+  "research",
+  "tla+",
+  "compiler",
+  "algorithms",
+  "performance",
 ];
 
 interface GeneratedNoteMeta {
@@ -156,7 +308,9 @@ async function main() {
     await fs.mkdir(path.join(rootTarget, f.name), { recursive: true });
   }
 
-  console.log(`[Seed] Generating metadata for ${ROOT_NOTE_COUNT + NOTES_PER_FOLDER * FOLDERS.length} notes...`);
+  console.log(
+    `[Seed] Generating metadata for ${ROOT_NOTE_COUNT + NOTES_PER_FOLDER * FOLDERS.length} notes...`,
+  );
   const allNotes: GeneratedNoteMeta[] = [];
 
   // Root notes
@@ -180,7 +334,12 @@ async function main() {
       const domain = randChoice(folder.domains);
       const slug = `${folder.prefix}-${domain.replace(/\s+/g, "-")}-${i}`;
       const title = `${domain} Reference & Design Doc ${i}`;
-      const tags = Array.from(new Set([folder.name.toLowerCase().split("-")[0], ...randSample(TECH_TAGS, randInt(2, 4))]));
+      const tags = Array.from(
+        new Set([
+          folder.name.toLowerCase().split("-")[0],
+          ...randSample(TECH_TAGS, randInt(2, 4)),
+        ]),
+      );
       allNotes.push({
         folder: folder.name,
         filename: `${slug}.md`,
@@ -204,33 +363,48 @@ async function main() {
   let notesWritten = 0;
   let pending: { filePath: string; content: string }[] = [];
   const flushNotes = async () => {
-    await Promise.all(pending.map(f => fs.writeFile(f.filePath, f.content, "utf-8")));
+    await Promise.all(
+      pending.map((f) => fs.writeFile(f.filePath, f.content, "utf-8")),
+    );
     notesWritten += pending.length;
     pending = [];
-    process.stdout.write(`\r[Seed] Written ${notesWritten} / ${allNotes.length} notes`);
+    process.stdout.write(
+      `\r[Seed] Written ${notesWritten} / ${allNotes.length} notes`,
+    );
   };
 
   for (let i = 0; i < allNotes.length; i++) {
     const note = allNotes[i];
     const wikilinkTargets: GeneratedNoteMeta[] = [];
     const sameCategoryNotes = notesByFolder.get(note.folder) ?? [];
-    wikilinkTargets.push(...pickRandom(sameCategoryNotes, randInt(2, 5)).filter(n => n.filename !== note.filename));
-    const otherFolders = FOLDER_KEYS.filter(k => k !== note.folder);
     wikilinkTargets.push(
-      ...randSample(otherFolders, randInt(2, 4)).map(fk => {
+      ...pickRandom(sameCategoryNotes, randInt(2, 5)).filter(
+        (n) => n.filename !== note.filename,
+      ),
+    );
+    const otherFolders = FOLDER_KEYS.filter((k) => k !== note.folder);
+    wikilinkTargets.push(
+      ...randSample(otherFolders, randInt(2, 4)).map((fk) => {
         const arr = notesByFolder.get(fk)!;
         return arr[Math.floor(rng() * arr.length)];
-      })
+      }),
     );
 
-    const wikilinkLines = wikilinkTargets.map((target, idx) => {
-      const targetRef = target.folder ? `${target.folder}/${target.filename.replace(/\.md$/, "")}` : target.filename.replace(/\.md$/, "");
-      const formatType = idx % 4;
-      if (formatType === 0) return `- Architecture relationship: [[${targetRef}]]`;
-      if (formatType === 1) return `- Cross-referenced specification: [[${targetRef}|${target.title}]]`;
-      if (formatType === 2) return `- Detailed analysis in section: [[${targetRef}#Implementation Details]]`;
-      return `![[${targetRef}]]`;
-    }).join("\n");
+    const wikilinkLines = wikilinkTargets
+      .map((target, idx) => {
+        const targetRef = target.folder
+          ? `${target.folder}/${target.filename.replace(/\.md$/, "")}`
+          : target.filename.replace(/\.md$/, "");
+        const formatType = idx % 4;
+        if (formatType === 0)
+          return `- Architecture relationship: [[${targetRef}]]`;
+        if (formatType === 1)
+          return `- Cross-referenced specification: [[${targetRef}|${target.title}]]`;
+        if (formatType === 2)
+          return `- Detailed analysis in section: [[${targetRef}#Implementation Details]]`;
+        return `![[${targetRef}]]`;
+      })
+      .join("\n");
 
     const extUrl1 = `${randChoice(URL_DOMAINS)}/spec-${(i % 100) + 1}`;
     const extUrl2 = `${randChoice(URL_DOMAINS)}/reference-${(i % 150) + 1}`;
@@ -295,7 +469,9 @@ ${wikilinkLines}
 - [-] Deprecate legacy synchronous fallback path #low
 `;
 
-    const fullPath = note.folder ? path.join(rootTarget, note.folder, note.filename) : path.join(rootTarget, note.filename);
+    const fullPath = note.folder
+      ? path.join(rootTarget, note.folder, note.filename)
+      : path.join(rootTarget, note.filename);
     pending.push({ filePath: fullPath, content });
     if (pending.length >= CHUNK_SIZE) {
       await flushNotes();
@@ -321,8 +497,10 @@ ${wikilinkLines}
       const dateStr = `${year}-${month}-${day}`;
 
       const relatedNotes = pickRandom(allNotes, randInt(2, 4));
-      const wikilinks = relatedNotes.map(n => {
-        const ref = n.folder ? `${n.folder}/${n.filename.replace(/\.md$/, "")}` : n.filename.replace(/\.md$/, "");
+      const wikilinks = relatedNotes.map((n) => {
+        const ref = n.folder
+          ? `${n.folder}/${n.filename.replace(/\.md$/, "")}`
+          : n.filename.replace(/\.md$/, "");
         return `[[${ref}]]`;
       });
 
@@ -331,7 +509,7 @@ ${wikilinkLines}
       const morningTasks = [
         `- Stand-up: reviewing shard balance and cluster health with the platform team.`,
         `- [x] Triage nightly integration test results #testing`,
-        `- [>] Investigate latency anomaly in ${wikilinks[0]} #high @due(${dateStr}) #debugging`
+        `- [>] Investigate latency anomaly in ${wikilinks[0]} #high @due(${dateStr}) #debugging`,
       ];
 
       const deepWorkTopics = [
@@ -339,13 +517,13 @@ ${wikilinkLines}
         `Reviewed pull request for distributed cache layer. Architecture documented in ${wikilinks[1]}.`,
         `Executed load testing suite against staging cluster. Reference: [Load Test Documentation](${extLink}).`,
         `- [ ] Finalize benchmark report and share with stakeholders #medium @due(${dateStr}) #perf`,
-        `- [x] Deploy hotfix to canary environment #${randChoice(TECH_TAGS)}`
+        `- [x] Deploy hotfix to canary environment #${randChoice(TECH_TAGS)}`,
       ];
 
       const wrapUpTopics = [
         `All latency targets achieved. P99 latency dropped below 15ms.`,
         `Next steps: coordinate with DevOps team on ${wikilinks[2] || wikilinks[0]}.`,
-        `End of day sync complete. No unresolved blockers.`
+        `End of day sync complete. No unresolved blockers.`,
       ];
 
       const dailyContent = `# Daily Log: ${dateStr}
@@ -367,11 +545,15 @@ ${wrapUpTopics.join("\n")}
   console.log(`[Seed] Total daily logs generated: ${dailyLogs.length}`);
   for (let i = 0; i < dailyLogs.length; i += CHUNK_SIZE) {
     const chunk = dailyLogs.slice(i, i + CHUNK_SIZE);
-    await Promise.all(chunk.map(log => {
-      const filePath = path.join(rootTarget, "myday", `${log.dateStr}.md`);
-      return fs.writeFile(filePath, log.content, "utf-8");
-    }));
-    process.stdout.write(`\r[Seed] Written ${Math.min(i + CHUNK_SIZE, dailyLogs.length)} / ${dailyLogs.length} daily logs`);
+    await Promise.all(
+      chunk.map((log) => {
+        const filePath = path.join(rootTarget, "myday", `${log.dateStr}.md`);
+        return fs.writeFile(filePath, log.content, "utf-8");
+      }),
+    );
+    process.stdout.write(
+      `\r[Seed] Written ${Math.min(i + CHUNK_SIZE, dailyLogs.length)} / ${dailyLogs.length} daily logs`,
+    );
   }
   console.log("\n[Seed] Daily logs write complete!");
 
@@ -382,20 +564,76 @@ ${wrapUpTopics.join("\n")}
   const timeStep = (endTimestamp - startTimestamp) / TOTAL_LINKS;
 
   const LINK_TOPICS = [
-    { domain: "https://github.com", category: "Open Source Repository", tagPrefix: ["oss", "git"] },
-    { domain: "https://huggingface.co", category: "AI Model & Dataset Card", tagPrefix: ["ai", "models"] },
-    { domain: "https://arxiv.org/abs", category: "Computer Science Research Paper", tagPrefix: ["research", "paper"] },
-    { domain: "https://docs.rs", category: "Rust Crate API Reference", tagPrefix: ["rust", "api"] },
-    { domain: "https://kubernetes.io/docs/concepts", category: "Kubernetes Architecture Guide", tagPrefix: ["k8s", "infra"] },
-    { domain: "https://postgresql.org/docs/current", category: "PostgreSQL Database Manual", tagPrefix: ["database", "postgres"] },
-    { domain: "https://opentelemetry.io/docs/specs", category: "OpenTelemetry Observability Spec", tagPrefix: ["otel", "observability"] },
-    { domain: "https://cloud.google.com/architecture", category: "Cloud Architecture Pattern", tagPrefix: ["cloud", "gcp"] },
-    { domain: "https://aws.amazon.com/blogs/architecture", category: "AWS Distributed Systems Deep Dive", tagPrefix: ["aws", "cloud"] },
-    { domain: "https://rfc-editor.org/rfc", category: "IETF RFC Internet Standard", tagPrefix: ["rfc", "networking"] },
-    { domain: "https://developer.mozilla.org/en-US/docs/Web", category: "Web Standards & API Docs", tagPrefix: ["web", "frontend"] },
-    { domain: "https://vllm.ai/docs", category: "High Throughput LLM Engine", tagPrefix: ["ai", "vllm"] },
-    { domain: "https://triton-lang.org/docs", category: "GPU Programming & Triton Kernels", tagPrefix: ["cuda", "gpu"] },
-    { domain: "https://redis.io/docs/data-types", category: "Redis In-Memory Data Structures", tagPrefix: ["cache", "redis"] }
+    {
+      domain: "https://github.com",
+      category: "Open Source Repository",
+      tagPrefix: ["oss", "git"],
+    },
+    {
+      domain: "https://huggingface.co",
+      category: "AI Model & Dataset Card",
+      tagPrefix: ["ai", "models"],
+    },
+    {
+      domain: "https://arxiv.org/abs",
+      category: "Computer Science Research Paper",
+      tagPrefix: ["research", "paper"],
+    },
+    {
+      domain: "https://docs.rs",
+      category: "Rust Crate API Reference",
+      tagPrefix: ["rust", "api"],
+    },
+    {
+      domain: "https://kubernetes.io/docs/concepts",
+      category: "Kubernetes Architecture Guide",
+      tagPrefix: ["k8s", "infra"],
+    },
+    {
+      domain: "https://postgresql.org/docs/current",
+      category: "PostgreSQL Database Manual",
+      tagPrefix: ["database", "postgres"],
+    },
+    {
+      domain: "https://opentelemetry.io/docs/specs",
+      category: "OpenTelemetry Observability Spec",
+      tagPrefix: ["otel", "observability"],
+    },
+    {
+      domain: "https://cloud.google.com/architecture",
+      category: "Cloud Architecture Pattern",
+      tagPrefix: ["cloud", "gcp"],
+    },
+    {
+      domain: "https://aws.amazon.com/blogs/architecture",
+      category: "AWS Distributed Systems Deep Dive",
+      tagPrefix: ["aws", "cloud"],
+    },
+    {
+      domain: "https://rfc-editor.org/rfc",
+      category: "IETF RFC Internet Standard",
+      tagPrefix: ["rfc", "networking"],
+    },
+    {
+      domain: "https://developer.mozilla.org/en-US/docs/Web",
+      category: "Web Standards & API Docs",
+      tagPrefix: ["web", "frontend"],
+    },
+    {
+      domain: "https://vllm.ai/docs",
+      category: "High Throughput LLM Engine",
+      tagPrefix: ["ai", "vllm"],
+    },
+    {
+      domain: "https://triton-lang.org/docs",
+      category: "GPU Programming & Triton Kernels",
+      tagPrefix: ["cuda", "gpu"],
+    },
+    {
+      domain: "https://redis.io/docs/data-types",
+      category: "Redis In-Memory Data Structures",
+      tagPrefix: ["cache", "redis"],
+    },
   ];
 
   const linksPath = path.join(rootTarget, "links.json");
@@ -407,22 +645,36 @@ ${wrapUpTopics.join("\n")}
   let firstLinkChunk = true;
   const flushLinks = async () => {
     if (linkChunk.length === 0) return;
-    await linksHandle.write((firstLinkChunk ? "" : ",\n") + linkChunk.join(",\n"));
+    await linksHandle.write(
+      (firstLinkChunk ? "" : ",\n") + linkChunk.join(",\n"),
+    );
     firstLinkChunk = false;
     linksWritten += linkChunk.length;
     linkChunk = [];
-    process.stdout.write(`\r[Seed] Written ${linksWritten} / ${TOTAL_LINKS} bookmarks`);
+    process.stdout.write(
+      `\r[Seed] Written ${linksWritten} / ${TOTAL_LINKS} bookmarks`,
+    );
   };
 
   for (let i = 1; i <= TOTAL_LINKS; i++) {
     const topic = randChoice(LINK_TOPICS);
-    const techTerm = randChoice([...AI_DOMAINS, ...ARCH_DOMAINS, ...INFRA_DOMAINS, ...BACKEND_DOMAINS, ...SECURITY_DOMAINS]);
+    const techTerm = randChoice([
+      ...AI_DOMAINS,
+      ...ARCH_DOMAINS,
+      ...INFRA_DOMAINS,
+      ...BACKEND_DOMAINS,
+      ...SECURITY_DOMAINS,
+    ]);
     const cleanSlug = techTerm.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const url = `${topic.domain}/${cleanSlug}-${i}`;
     const title = `${techTerm} - ${topic.category} #${i}`;
     const description = `Production reference and architectural guidelines for ${techTerm}. Key benchmarks, deployment manifests, and troubleshooting runbooks.`;
-    const tags = Array.from(new Set([...topic.tagPrefix, ...randSample(TECH_TAGS, randInt(2, 4))]));
-    const createdAt = Math.floor(startTimestamp + (i * timeStep) + randInt(-3600000, 3600000));
+    const tags = Array.from(
+      new Set([...topic.tagPrefix, ...randSample(TECH_TAGS, randInt(2, 4))]),
+    );
+    const createdAt = Math.floor(
+      startTimestamp + i * timeStep + randInt(-3600000, 3600000),
+    );
 
     linkChunk.push(
       JSON.stringify({
@@ -433,7 +685,7 @@ ${wrapUpTopics.join("\n")}
         tags,
         createdAt,
         isManual: true,
-      })
+      }),
     );
     if (linkChunk.length >= LINK_CHUNK_SIZE) {
       await flushLinks();
@@ -448,22 +700,36 @@ ${wrapUpTopics.join("\n")}
     theme: "nord",
     language: "en",
     autoSyncEnabled: false,
-    autoSyncIntervalMins: 5
+    autoSyncIntervalMins: 5,
   };
-  await fs.writeFile(path.join(rootTarget, "config.json"), JSON.stringify(configContent, null, 2), "utf-8");
+  await fs.writeFile(
+    path.join(rootTarget, "config.json"),
+    JSON.stringify(configContent, null, 2),
+    "utf-8",
+  );
 
-  await fs.writeFile(path.join(rootTarget, ".gitignore"), ".lyra/\n.env\n*.tmp\n", "utf-8");
+  await fs.writeFile(
+    path.join(rootTarget, ".gitignore"),
+    ".lyra/\n.env\n*.tmp\n",
+    "utf-8",
+  );
 
   console.log("\n=======================================================");
   console.log("✅ Lyra Demo Data Generation Successfully Completed!");
-  console.log(`📁 Root Memos: ${ROOT_NOTE_COUNT.toLocaleString("en-US")} notes`);
-  console.log(`📁 ${FOLDERS.length} Category Folders: ${(NOTES_PER_FOLDER * FOLDERS.length).toLocaleString("en-US")} notes (${NOTES_PER_FOLDER.toLocaleString("en-US")} per folder)`);
-  console.log(`📅 Daily Logs (myday): ${dailyLogs.length} logs (10 years: 2016-2026)`);
+  console.log(
+    `📁 Root Memos: ${ROOT_NOTE_COUNT.toLocaleString("en-US")} notes`,
+  );
+  console.log(
+    `📁 ${FOLDERS.length} Category Folders: ${(NOTES_PER_FOLDER * FOLDERS.length).toLocaleString("en-US")} notes (${NOTES_PER_FOLDER.toLocaleString("en-US")} per folder)`,
+  );
+  console.log(
+    `📅 Daily Logs (myday): ${dailyLogs.length} logs (10 years: 2016-2026)`,
+  );
   console.log(`🔗 Links (links.json): ${linksWritten} saved bookmarks`);
   console.log("=======================================================\n");
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error("Error during seed:", err);
   process.exit(1);
 });

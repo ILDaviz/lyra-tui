@@ -66,16 +66,16 @@ variables already present in `.env` are preserved.
 
 ## `config.json` Reference
 
-| Field                  | Type             | Default       | Description                                            |
-| ---------------------- | ---------------- | ------------- | ------------------------------------------------------ |
-| `language`             | `"en" \| "it"`   | `"en"`        | UI language (any `it*` value normalizes to `it`)       |
-| `theme`                | string id        | `"dark"`      | Theme id (see Themes below)                            |
-| `aiProvider`           | see AI Providers | auto-detected | Explicit provider; unset → detected from keys          |
-| `aiModel`              | string           | per provider  | Global model override, takes precedence over defaults  |
-| `autoSyncEnabled`      | boolean          | `false`       | Run Git auto-sync (`lyra daemon`)                      |
-| `autoSyncIntervalMins` | number           | `5`           | Daemon sync interval in minutes                        |
-| `customRepoPath`       | string           | —             | Vault redirect (stored in the default vault)           |
-| `customBaseUrl`        | string           | —             | Base URL of an OpenAI-compatible endpoint (`custom`)   |
+| Field                  | Type             | Default       | Description                                           |
+| ---------------------- | ---------------- | ------------- | ----------------------------------------------------- |
+| `language`             | `"en" \| "it"`   | `"en"`        | UI language (any `it*` value normalizes to `it`)      |
+| `theme`                | string id        | `"dark"`      | Theme id (see Themes below)                           |
+| `aiProvider`           | see AI Providers | auto-detected | Explicit provider; unset → detected from keys         |
+| `aiModel`              | string           | per provider  | Global model override, takes precedence over defaults |
+| `autoSyncEnabled`      | boolean          | `false`       | Run Git auto-sync (`lyra daemon`)                     |
+| `autoSyncIntervalMins` | number           | `5`           | Daemon sync interval in minutes                       |
+| `customRepoPath`       | string           | —             | Vault redirect (stored in the default vault)          |
+| `customBaseUrl`        | string           | —             | Base URL of an OpenAI-compatible endpoint (`custom`)  |
 
 There is no schema validation: unknown keys are kept but ignored, and typos
 fail silently. After editing by hand, verify with `lyra status --json`.
@@ -107,14 +107,14 @@ Rules:
 
 Supported `aiProvider` values and their defaults:
 
-| Provider    | Default model              | Key source (`config.json` / env)                                            | Notes                                              |
-| ----------- | -------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------- |
-| `openai`    | `gpt-5.6-luna`             | `openaiApiKey` / `OPENAI_API_KEY`, `OPENAI_TOKEN`                           | Fallback provider when nothing is set              |
-| `anthropic` | `claude-3-7-sonnet-latest` | `anthropicApiKey` / `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`             |                                                    |
-| `google`    | `gemini-3.7-flash`         | `googleApiKey` / `GOOGLE_API_KEY`, `GEMINI_API_KEY`                         |                                                    |
-| `ollama`    | `llama3.3`                 | `ollamaUrl`, `ollamaModel` (via `.env`)                                     | Base URL default `http://localhost:11434`          |
-| `custom`    | `gpt-5.6-luna`             | `customApiKey` / `CUSTOM_AI_API_KEY`                                        | Any OpenAI-compatible endpoint via `customBaseUrl` |
-| `gateway`   | `google/gemini-3.7-flash`  | `aiGatewayKey` / `AI_GATEWAY_API_KEY`                                       | Vercel AI Gateway                                  |
+| Provider    | Default model              | Key source (`config.json` / env)                                | Notes                                              |
+| ----------- | -------------------------- | --------------------------------------------------------------- | -------------------------------------------------- |
+| `openai`    | `gpt-5.6-luna`             | `openaiApiKey` / `OPENAI_API_KEY`, `OPENAI_TOKEN`               | Fallback provider when nothing is set              |
+| `anthropic` | `claude-3-7-sonnet-latest` | `anthropicApiKey` / `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` |                                                    |
+| `google`    | `gemini-3.7-flash`         | `googleApiKey` / `GOOGLE_API_KEY`, `GEMINI_API_KEY`             |                                                    |
+| `ollama`    | `llama3.3`                 | `ollamaUrl`, `ollamaModel` (via `.env`)                         | Base URL default `http://localhost:11434`          |
+| `custom`    | `gpt-5.6-luna`             | `customApiKey` / `CUSTOM_AI_API_KEY`                            | Any OpenAI-compatible endpoint via `customBaseUrl` |
+| `gateway`   | `google/gemini-3.7-flash`  | `aiGatewayKey` / `AI_GATEWAY_API_KEY`                           | Vercel AI Gateway                                  |
 
 Provider detection when `aiProvider` is unset — first key found wins, in
 this order: `anthropic` → `google` → `custom` (key or base URL) → `gateway`
@@ -144,7 +144,7 @@ printf 'CUSTOM_BASE_URL=https://my-endpoint/v1\nCUSTOM_AI_API_KEY=sk-...\n' >> ~
 // ~/.lyra/config.json — pin a provider and model explicitly
 {
   "aiProvider": "anthropic",
-  "aiModel": "claude-3-7-sonnet-latest"
+  "aiModel": "claude-3-7-sonnet-latest",
 }
 ```
 
@@ -194,7 +194,7 @@ startup; the same value is also passed to AI prompts.
 // ~/.lyra/config.json
 {
   "autoSyncEnabled": true,
-  "autoSyncIntervalMins": 10
+  "autoSyncIntervalMins": 10,
 }
 ```
 

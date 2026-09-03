@@ -79,15 +79,7 @@ function buildStoreCommand(
   if (kind === "security") {
     return {
       command: "security",
-      args: [
-        "add-generic-password",
-        "-U",
-        "-a",
-        key,
-        "-s",
-        SERVICE_NAME,
-        "-w",
-      ],
+      args: ["add-generic-password", "-U", "-a", key, "-s", SERVICE_NAME, "-w"],
       input: value,
     };
   }
@@ -118,10 +110,7 @@ function buildStoreCommand(
   };
 }
 
-function buildLookupCommand(
-  kind: SecretStoreKind,
-  key: string,
-): SecretCommand {
+function buildLookupCommand(kind: SecretStoreKind, key: string): SecretCommand {
   if (kind === "security") {
     return {
       command: "security",
@@ -146,10 +135,7 @@ function buildLookupCommand(
   };
 }
 
-function buildDeleteCommand(
-  kind: SecretStoreKind,
-  key: string,
-): SecretCommand {
+function buildDeleteCommand(kind: SecretStoreKind, key: string): SecretCommand {
   if (kind === "security") {
     return {
       command: "security",

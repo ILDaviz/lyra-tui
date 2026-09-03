@@ -2,6 +2,23 @@
   "name": "@lyratui/core",
   "version": "0.1.0",
   "description": "Core storage, Git synchronization, RAG and domain services for Lyra",
+  "author": "David Galet <davidgalet@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ILDaviz/lyra-tui.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/ILDaviz/lyra-tui/issues"
+  },
+  "homepage": "https://github.com/ILDaviz/lyra-tui#readme",
+  "keywords": [
+    "rag",
+    "git-sync",
+    "storage",
+    "ai"
+  ],
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
@@ -12,8 +29,6 @@
     "@ai-sdk/anthropic": "^4.0.40",
     "@ai-sdk/google": "^4.0.48",
     "@ai-sdk/openai": "^4.0.45",
-    "@orama/orama": "^3.1.18",
-    "@orama/plugin-data-persistence": "^3.1.18",
     "@xenova/transformers": "^2.17.2",
     "ai": "^7.0.71",
     "commander": "^15.0.0",

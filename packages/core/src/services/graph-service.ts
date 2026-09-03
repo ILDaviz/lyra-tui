@@ -458,40 +458,54 @@ export class GraphService {
     for (const [folder, files] of folderFiles) {
       const folderPath = resolveFolderPath(folder);
       for (const filename of files) {
-        items.push({ folder, filename, filePath: path.join(folderPath, filename) });
+        items.push({
+          folder,
+          filename,
+          filePath: path.join(folderPath, filename),
+        });
       }
     }
     for (const filename of myDayFiles) {
-      items.push({ folder: "myday", filename, filePath: path.join(myDayPath, filename) });
+      items.push({
+        folder: "myday",
+        filename,
+        filePath: path.join(myDayPath, filename),
+      });
     }
 
     const scanned = await Promise.all(
-      items.map(async ({ folder, filename, filePath }): Promise<GraphScanEntry | null> => {
-        try {
-          const stat = await fs.stat(filePath);
-          const data = await cachedFileScan<CachedNoteGraphData>(
-            GRAPH_SCAN_KIND,
-            filePath,
-            stat,
-            () => parseNoteGraphData(filePath, filename),
-          );
-          const note: RawNoteData = {
-            id: getRelativePath(folder, filename),
-            filename,
-            folderName: folder,
-            title: data.title,
-            aliases: data.aliases,
-            tags: data.fmTags,
-          };
-          return { folder, filename, note, data };
-        } catch (err) {
-          if ((err as NodeJS.ErrnoException)?.code !== "ENOENT") {
-            console.error(`Error reading note ${filePath} for graph:`, err);
-            captureException(err);
+      items.map(
+        async ({
+          folder,
+          filename,
+          filePath,
+        }): Promise<GraphScanEntry | null> => {
+          try {
+            const stat = await fs.stat(filePath);
+            const data = await cachedFileScan<CachedNoteGraphData>(
+              GRAPH_SCAN_KIND,
+              filePath,
+              stat,
+              () => parseNoteGraphData(filePath, filename),
+            );
+            const note: RawNoteData = {
+              id: getRelativePath(folder, filename),
+              filename,
+              folderName: folder,
+              title: data.title,
+              aliases: data.aliases,
+              tags: data.fmTags,
+            };
+            return { folder, filename, note, data };
+          } catch (err) {
+            if ((err as NodeJS.ErrnoException)?.code !== "ENOENT") {
+              console.error(`Error reading note ${filePath} for graph:`, err);
+              captureException(err);
+            }
+            return null;
           }
-          return null;
-        }
-      }),
+        },
+      ),
     );
 
     const entries = scanned.filter((e): e is GraphScanEntry => e !== null);

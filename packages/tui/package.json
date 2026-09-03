@@ -2,6 +2,23 @@
   "name": "@lyratui/tui",
   "version": "0.1.0",
   "description": "OpenTUI React terminal user interface for Lyra",
+  "author": "David Galet <davidgalet@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ILDaviz/lyra-tui.git",
+    "directory": "packages/tui"
+  },
+  "bugs": {
+    "url": "https://github.com/ILDaviz/lyra-tui/issues"
+  },
+  "homepage": "https://github.com/ILDaviz/lyra-tui#readme",
+  "keywords": [
+    "tui",
+    "opentui",
+    "react",
+    "terminal-ui"
+  ],
   "bin": {
     "lyratui": "./bin/lyra-tui.ts"
   },

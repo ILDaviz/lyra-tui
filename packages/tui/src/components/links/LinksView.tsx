@@ -134,7 +134,16 @@ export function LinksView(): any {
       }
     }
     return result;
-  }, [filter, hasQuery, filteredLinks, manualLinks, noteLinks, myDayLinks, t, keys]);
+  }, [
+    filter,
+    hasQuery,
+    filteredLinks,
+    manualLinks,
+    noteLinks,
+    myDayLinks,
+    t,
+    keys,
+  ]);
 
   const getRowHeight = useMemo(
     () => (row: LinkRow) =>

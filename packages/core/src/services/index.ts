@@ -1,4 +1,5 @@
 export * from "./folders-service";
+export * from "./migrations-service";
 export * from "./notes-service";
 export * from "./myday-service";
 export * from "./todos-service";

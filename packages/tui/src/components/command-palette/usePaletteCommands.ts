@@ -251,9 +251,7 @@ export function usePaletteCommands({
       {
         id: "toggle-keychain",
         title: t(keys.CMD_TOGGLE_KEYCHAIN, {
-          state: getConfig().useKeychain
-            ? t(keys.STATE_ON)
-            : t(keys.STATE_OFF),
+          state: getConfig().useKeychain ? t(keys.STATE_ON) : t(keys.STATE_OFF),
         }),
         category: t(keys.CAT_SYSTEM),
         action: async () => {

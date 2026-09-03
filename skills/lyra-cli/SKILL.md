@@ -26,11 +26,11 @@ bun run packages/tui/bin/lyra-tui.ts <command> # from this repository
 
 ## Conventions
 
-| Convention  | Meaning                                                          |
-| ----------- | ---------------------------------------------------------------- |
-| `-j, --json`| Machine-readable JSON output — always use this in scripts/agents |
-| `--dry-run` | Print the mutation without writing it (supported where noted)    |
-| `--no-color`| Strip ANSI colors from output                                    |
+| Convention   | Meaning                                                          |
+| ------------ | ---------------------------------------------------------------- |
+| `-j, --json` | Machine-readable JSON output — always use this in scripts/agents |
+| `--dry-run`  | Print the mutation without writing it (supported where noted)    |
+| `--no-color` | Strip ANSI colors from output                                    |
 
 The CLI has **no destructive commands**: there is no note/folder/link delete.
 The only mutations are create/append/toggle and Git sync.
@@ -65,12 +65,12 @@ lyra note new "Architecture Decision Records" \
 
 `note new <title...>` options:
 
-| Option             | Effect                                                     |
-| ------------------ | ---------------------------------------------------------- |
-| `-f, --folder`     | Target folder (default `/`)                                |
-| `-c, --content`    | Initial Markdown body (default `# <title>`)                |
-| `--force`          | Overwrite an existing note                                 |
-| `--dry-run`        | Show the file that would be created                        |
+| Option          | Effect                                      |
+| --------------- | ------------------------------------------- |
+| `-f, --folder`  | Target folder (default `/`)                 |
+| `-c, --content` | Initial Markdown body (default `# <title>`) |
+| `--force`       | Overwrite an existing note                  |
+| `--dry-run`     | Show the file that would be created         |
 
 The filename is derived from the title (`Architecture Plan` →
 `architecture-plan.md`).
@@ -96,13 +96,13 @@ lyra todo list -p high -f Engineering --all
 
 `todo list` options:
 
-| Option                 | Effect                                                        |
-| ---------------------- | ------------------------------------------------------------- |
-| `--status <status>`    | `todo` \| `in_progress` \| `urgent` \| `question` \| `paused` \| `done` \| `all` |
-| `-p, --priority`       | `high` \| `medium` \| `low`                                   |
-| `-f, --folder`         | Filter by folder                                              |
-| `-a, --all`            | Include completed tasks                                       |
-| `-j, --json`           | Structured JSON (includes `folderName`, `filename`, `index`)  |
+| Option              | Effect                                                                           |
+| ------------------- | -------------------------------------------------------------------------------- |
+| `--status <status>` | `todo` \| `in_progress` \| `urgent` \| `question` \| `paused` \| `done` \| `all` |
+| `-p, --priority`    | `high` \| `medium` \| `low`                                                      |
+| `-f, --folder`      | Filter by folder                                                                 |
+| `-a, --all`         | Include completed tasks                                                          |
+| `-j, --json`        | Structured JSON (includes `folderName`, `filename`, `index`)                     |
 
 Without filters only pending tasks are shown.
 
@@ -114,14 +114,14 @@ lyra todo toggle Engineering "Testing.md" 3 --dry-run
 
 `todo add <text...>` options:
 
-| Option            | Effect                                                          |
-| ----------------- | --------------------------------------------------------------- |
-| `--today`         | Append to today's Daily Log (default when no folder/file given) |
-| `-f, --folder`    | Target note folder (used with `--file`)                         |
-| `--file <file>`   | Target note filename (default `Inbox.md`)                       |
-| `-p, --priority`  | `high` \| `medium` \| `low` (writes `#high` / `#low`)           |
-| `-d, --due`       | Due date `YYYY-MM-DD` (writes `@due(...)`)                      |
-| `--dry-run`       | Preview the appended line                                       |
+| Option           | Effect                                                          |
+| ---------------- | --------------------------------------------------------------- |
+| `--today`        | Append to today's Daily Log (default when no folder/file given) |
+| `-f, --folder`   | Target note folder (used with `--file`)                         |
+| `--file <file>`  | Target note filename (default `Inbox.md`)                       |
+| `-p, --priority` | `high` \| `medium` \| `low` (writes `#high` / `#low`)           |
+| `-d, --due`      | Due date `YYYY-MM-DD` (writes `@due(...)`)                      |
+| `--dry-run`      | Preview the appended line                                       |
 
 The appended line is `- [ ] <text> [#high|#low] [@due(...)]`. A missing target
 note is created automatically with a `# <Title>` header.
@@ -167,14 +167,14 @@ lyra graph export graph.json --note "My Note" --depth 1
 lyra graph export -f dot                    # stdout, Graphviz DOT
 ```
 
-| Command            | Options                                                                   |
-| ------------------ | ------------------------------------------------------------------------- |
-| `stats`            | `-j, --json`                                                              |
-| `show <note...>`   | `-d, --depth <1\|2>` (default 1), `-j, --json`                            |
-| `nodes`            | `--unresolved` (`--missing`), `--orphans`, `-t, --tag`, `-s, --sort connections\|in\|out\|title`, `-j, --json` |
-| `edges`            | `--source <note>`, `--target <note>`, `--type wikilink\|embed\|markdown`, `-j, --json` |
-| `backlinks <note...>` | `-j, --json` (includes context snippets)                               |
-| `export [file]`    | `-f, --format json\|mermaid\|dot` (inferred from extension: `.json`, `.mmd`, `.dot`), `-n, --note <note>` (local subgraph), `-d, --depth` |
+| Command               | Options                                                                                                                                   |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `stats`               | `-j, --json`                                                                                                                              |
+| `show <note...>`      | `-d, --depth <1\|2>` (default 1), `-j, --json`                                                                                            |
+| `nodes`               | `--unresolved` (`--missing`), `--orphans`, `-t, --tag`, `-s, --sort connections\|in\|out\|title`, `-j, --json`                            |
+| `edges`               | `--source <note>`, `--target <note>`, `--type wikilink\|embed\|markdown`, `-j, --json`                                                    |
+| `backlinks <note...>` | `-j, --json` (includes context snippets)                                                                                                  |
+| `export [file]`       | `-f, --format json\|mermaid\|dot` (inferred from extension: `.json`, `.mmd`, `.dot`), `-n, --note <note>` (local subgraph), `-d, --depth` |
 
 ## `lyra sync` and `lyra daemon`
 

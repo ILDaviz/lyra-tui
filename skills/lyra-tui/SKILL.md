@@ -78,86 +78,86 @@ command palette ("View Notes / My Day / Todos / Links").
 
 ## Navigator (Sidebar: Folders & Views)
 
-| Key                        | Action                                    |
-| -------------------------- | ----------------------------------------- |
-| `Up`/`Down` or `j`/`k`     | Navigate folders and views                |
-| `Enter` / `Space`          | Select folder or open special view        |
-| `n` / `Ctrl+F`             | Create new folder (modal)                 |
-| `r` / `F2`                 | Rename selected folder (modal)            |
-| `d` / `Delete` / `Backspace` | Delete selected folder (confirmation)   |
+| Key                          | Action                                |
+| ---------------------------- | ------------------------------------- |
+| `Up`/`Down` or `j`/`k`       | Navigate folders and views            |
+| `Enter` / `Space`            | Select folder or open special view    |
+| `n` / `Ctrl+F`               | Create new folder (modal)             |
+| `r` / `F2`                   | Rename selected folder (modal)        |
+| `d` / `Delete` / `Backspace` | Delete selected folder (confirmation) |
 
 ## Notes List
 
-| Key                        | Action                                  |
-| -------------------------- | --------------------------------------- |
-| `Up`/`Down` or `j`/`k`     | Navigate notes                          |
-| `Enter` / `Space`          | Open note in Editor (viewing mode)      |
-| `Ctrl+N`                   | Create new note in current folder       |
-| `v` / `Ctrl+E`             | Open in external editor (`$VISUAL`/`$EDITOR`) |
-| `m`                        | Move note to another folder (modal)     |
-| `d` / `Delete`             | Delete note (confirmation modal)        |
-| `PgUp` / `PgDn`            | Page through notes                      |
-| `Home`/`End` or `g`/`G`    | Jump to first / last note               |
+| Key                     | Action                                        |
+| ----------------------- | --------------------------------------------- |
+| `Up`/`Down` or `j`/`k`  | Navigate notes                                |
+| `Enter` / `Space`       | Open note in Editor (viewing mode)            |
+| `Ctrl+N`                | Create new note in current folder             |
+| `v` / `Ctrl+E`          | Open in external editor (`$VISUAL`/`$EDITOR`) |
+| `m`                     | Move note to another folder (modal)           |
+| `d` / `Delete`          | Delete note (confirmation modal)              |
+| `PgUp` / `PgDn`         | Page through notes                            |
+| `Home`/`End` or `g`/`G` | Jump to first / last note                     |
 
 ## Editor — Viewing Mode
 
-| Key                          | Action                                        |
-| ---------------------------- | --------------------------------------------- |
-| `e` / `i` / `Enter`          | Enter text **editing** mode                   |
-| `v` / `Ctrl+E`               | Open in external editor (`$VISUAL`/`$EDITOR`) |
-| `Ctrl+C`/`Cmd+C` or `y`      | Copy note / selection                         |
-| `Ctrl+Shift+A` / `Cmd+Shift+A` | Open the AI assistant (if configured)       |
-| `b` / `Ctrl+G` / `Cmd+G`     | Local knowledge graph of this note            |
-| `h`                          | Revision history (preview / restore)          |
-| `a`                          | Attachments of this note (`Enter` opens with the default system app, `f` opens `attachments/`) |
-| `m`                          | Move note to another folder                   |
-| `d` / `Delete` / `Backspace` / `Ctrl+D` | Delete note (confirmation)         |
-| `Up`/`Down` or `j`/`k`       | Scroll                                        |
-| `PgUp` / `PgDn` / `Space`    | Rapid page scroll                             |
-| `Home`/`End`/`Shift+G`       | Jump to top / bottom                          |
+| Key                                     | Action                                                                                         |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `e` / `i` / `Enter`                     | Enter text **editing** mode                                                                    |
+| `v` / `Ctrl+E`                          | Open in external editor (`$VISUAL`/`$EDITOR`)                                                  |
+| `Ctrl+C`/`Cmd+C` or `y`                 | Copy note / selection                                                                          |
+| `Ctrl+Shift+A` / `Cmd+Shift+A`          | Open the AI assistant (if configured)                                                          |
+| `b` / `Ctrl+G` / `Cmd+G`                | Local knowledge graph of this note                                                             |
+| `h`                                     | Revision history (preview / restore)                                                           |
+| `a`                                     | Attachments of this note (`Enter` opens with the default system app, `f` opens `attachments/`) |
+| `m`                                     | Move note to another folder                                                                    |
+| `d` / `Delete` / `Backspace` / `Ctrl+D` | Delete note (confirmation)                                                                     |
+| `Up`/`Down` or `j`/`k`                  | Scroll                                                                                         |
+| `PgUp` / `PgDn` / `Space`               | Rapid page scroll                                                                              |
+| `Home`/`End`/`Shift+G`                  | Jump to top / bottom                                                                           |
 
 ## Editor — Editing Mode
 
-| Key                            | Action                                    |
-| ------------------------------ | ----------------------------------------- |
-| `Ctrl+S` / `Cmd+S`             | Save changes                              |
-| `Esc`                          | Save and exit edit mode                   |
-| `Ctrl+E` / `Cmd+E`             | Open in external editor                   |
-| `Ctrl+B` / `Cmd+B`             | Bold                                      |
-| `Ctrl+I` / `Cmd+I`             | Link (`[[...]]`)                          |
-| `Ctrl+L` / `Cmd+L`             | Insert todo checkbox `[ ]`                |
-| `Ctrl+T` / `Cmd+T`             | Insert code block                         |
-| `Ctrl+Alt+K`                   | Insert a code block                       |
-| `Ctrl+W` / `Cmd+W`             | Insert wikilink (opens the picker)        |
+| Key                            | Action                                                                                                                           |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| `Ctrl+S` / `Cmd+S`             | Save changes                                                                                                                     |
+| `Esc`                          | Save and exit edit mode                                                                                                          |
+| `Ctrl+E` / `Cmd+E`             | Open in external editor                                                                                                          |
+| `Ctrl+B` / `Cmd+B`             | Bold                                                                                                                             |
+| `Ctrl+I` / `Cmd+I`             | Link (`[[...]]`)                                                                                                                 |
+| `Ctrl+L` / `Cmd+L`             | Insert todo checkbox `[ ]`                                                                                                       |
+| `Ctrl+T` / `Cmd+T`             | Insert code block                                                                                                                |
+| `Ctrl+Alt+K`                   | Insert a code block                                                                                                              |
+| `Ctrl+W` / `Cmd+W`             | Insert wikilink (opens the picker)                                                                                               |
 | `Ctrl+O` / `Cmd+O`             | Attach a file: type, paste, or drag the file onto the terminal; it is copied into `attachments/` and a Markdown link is inserted |
-| `Ctrl+Shift+A` / `Cmd+Shift+A` | AI assistant (rewrite / memo, if configured) |
-| `Ctrl+C` / `X` / `V`           | Copy / cut / paste selection              |
-| `Tab`                          | Indent current line                       |
+| `Ctrl+Shift+A` / `Cmd+Shift+A` | AI assistant (rewrite / memo, if configured)                                                                                     |
+| `Ctrl+C` / `X` / `V`           | Copy / cut / paste selection                                                                                                     |
+| `Tab`                          | Indent current line                                                                                                              |
 
 ## My Day (Daily Log)
 
-| Key                    | Action                     |
-| ---------------------- | -------------------------- |
-| `Up`/`Down` or `j`/`k` | Navigate dates             |
-| `Enter` / `Space`      | Open selected daily log    |
-| `v` / `Ctrl+E`         | Open in external editor    |
+| Key                    | Action                  |
+| ---------------------- | ----------------------- |
+| `Up`/`Down` or `j`/`k` | Navigate dates          |
+| `Enter` / `Space`      | Open selected daily log |
+| `v` / `Ctrl+E`         | Open in external editor |
 
 Daily logs live in `myday/YYYY-MM-DD.md` and can contain normal Markdown,
 todos, and links.
 
 ## Todos View
 
-| Key                      | Action                                                |
-| ------------------------ | ----------------------------------------------------- |
-| `Space` / `Enter`        | Complete / reopen task (the only way to complete)     |
-| `s`                      | Cycle status: `[ ]` ➔ `[>]` in progress ➔ `[!]` urgent ➔ `[?]` waiting ➔ `[-]` paused |
-| `m`                      | Cycle priority: Medium ➔ High ➔ Low                   |
-| `g`                      | Go to the note / daily log containing the task        |
-| `1` or `p`               | Filter: pending tasks                                 |
-| `2` or `d`               | Filter: completed tasks                               |
-| `3` or `a`               | Filter: all tasks                                     |
-| `t` / `f`                | Cycle filters                                         |
-| `Ctrl+R`                 | Reload and resync tasks from all notes                |
+| Key               | Action                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------- |
+| `Space` / `Enter` | Complete / reopen task (the only way to complete)                                     |
+| `s`               | Cycle status: `[ ]` ➔ `[>]` in progress ➔ `[!]` urgent ➔ `[?]` waiting ➔ `[-]` paused |
+| `m`               | Cycle priority: Medium ➔ High ➔ Low                                                   |
+| `g`               | Go to the note / daily log containing the task                                        |
+| `1` or `p`        | Filter: pending tasks                                                                 |
+| `2` or `d`        | Filter: completed tasks                                                               |
+| `3` or `a`        | Filter: all tasks                                                                     |
+| `t` / `f`         | Cycle filters                                                                         |
+| `Ctrl+R`          | Reload and resync tasks from all notes                                                |
 
 ### Todo Markdown Syntax
 
@@ -165,11 +165,11 @@ Written inside any note or daily log; statuses are checkbox markers:
 
 ```markdown
 - [ ] Pending task (default)
-- [>] Task in progress        (- [/] is equivalent)
+- [>] Task in progress (- [/] is equivalent)
 - [!] Urgent task (auto High priority)
 - [?] Question / waiting on someone
 - [-] Paused task
-- [x] Completed task          (- [X] also works)
+- [x] Completed task (- [X] also works)
 ```
 
 Metadata appended to the line:
@@ -184,19 +184,19 @@ Metadata appended to the line:
 
 ## Links View
 
-| Key                          | Action                                    |
-| ---------------------------- | ----------------------------------------- |
-| `Up`/`Down` or `j`/`k`       | Navigate links                            |
-| `Enter`                      | Open link in default web browser          |
-| `a`                          | Add a manual link (modal)                 |
-| `d` / `Delete` / `Backspace` / `x` | Delete selected **manual** link     |
-| `g`                          | Go to the note containing the link        |
-| `1` or `m`                   | Filter: manual bookmarks                  |
-| `2` or `n`                   | Filter: links extracted from notes        |
-| `3` or `y`                   | Filter: links extracted from daily logs   |
-| `4`                          | Filter: all links                         |
-| `t` / `f`                    | Cycle filters                             |
-| `Ctrl+R`                     | Reload catalog from notes                 |
+| Key                                | Action                                  |
+| ---------------------------------- | --------------------------------------- |
+| `Up`/`Down` or `j`/`k`             | Navigate links                          |
+| `Enter`                            | Open link in default web browser        |
+| `a`                                | Add a manual link (modal)               |
+| `d` / `Delete` / `Backspace` / `x` | Delete selected **manual** link         |
+| `g`                                | Go to the note containing the link      |
+| `1` or `m`                         | Filter: manual bookmarks                |
+| `2` or `n`                         | Filter: links extracted from notes      |
+| `3` or `y`                         | Filter: links extracted from daily logs |
+| `4`                                | Filter: all links                       |
+| `t` / `f`                          | Cycle filters                           |
+| `Ctrl+R`                           | Reload catalog from notes               |
 
 ## Command Palette (`Ctrl+P`)
 

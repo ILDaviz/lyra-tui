@@ -191,9 +191,9 @@ describe("GitService", () => {
 
   it("should untrack a pre-existing tracked .env on commit", async () => {
     const legacyRepoPath = path.join(__dirname, "temp-test-repo-legacy-env");
-    await fs.rm(legacyRepoPath, { recursive: true, force: true }).catch(
-      () => {},
-    );
+    await fs
+      .rm(legacyRepoPath, { recursive: true, force: true })
+      .catch(() => {});
     await fs.mkdir(legacyRepoPath, { recursive: true });
 
     await fs.writeFile(

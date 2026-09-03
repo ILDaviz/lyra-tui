@@ -36,6 +36,8 @@ export default defineConfig([
             "eslint.config.ts",
             "commitlint.config.ts",
             "scripts/seed-demo-data.ts",
+            "scripts/prepare-onnx-dylib.ts",
+            "scripts/build-bin.ts",
           ],
         },
         tsconfigRootDir: __dirname,

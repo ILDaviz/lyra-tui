@@ -206,7 +206,7 @@ export function getConfig(): AppConfig {
 }
 
 export function resetServices(): void {
-  embeddingService?.dispose();
+  void embeddingService?.dispose();
   gitService = null;
   embeddingService = null;
   customRepoPath = null;

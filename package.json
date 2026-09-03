@@ -3,6 +3,23 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Lyra TUI - Terminal-based personal notes and knowledge manager",
+  "author": "David Galet <davidgalet@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ILDaviz/lyra-tui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ILDaviz/lyra-tui/issues"
+  },
+  "homepage": "https://github.com/ILDaviz/lyra-tui#readme",
+  "keywords": [
+    "tui",
+    "notes",
+    "knowledge-manager",
+    "opentui",
+    "terminal"
+  ],
   "workspaces": [
     "packages/*"
   ],
@@ -17,7 +34,8 @@
     "prepare": "husky",
     "test": "vitest run",
     "build": "tsc -b",
-    "build:bin": "bun build --compile --minify --production packages/tui/bin/lyra-tui.ts --outfile dist/lyra",
+    "prebuild:bin": "bun run scripts/prepare-onnx-dylib.ts",
+    "build:bin": "bun run scripts/build-bin.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "commitlint": "commitlint --edit",
@@ -29,13 +47,13 @@
     "@commitlint/config-conventional": "^21.2.2",
     "@commitlint/types": "^21.2.0",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^26.1.0",
-    "eslint": "^10.8.1",
+    "@types/node": "^26.4.1",
+    "eslint": "^10.9.1",
     "eslint-plugin-import": "^2.32.0",
     "husky": "^9.1.7",
-    "prettier": "^3.9.4",
+    "prettier": "^3.9.6",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.67.0",
-    "vitest": "^4.1.9"
+    "typescript-eslint": "^8.69.0",
+    "vitest": "^4.1.11"
   }
 }

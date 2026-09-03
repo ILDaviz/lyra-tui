@@ -130,10 +130,20 @@ LYRA_REPO_PATH="$PWD/lyra_dev" bun run packages/tui/bin/lyra-tui.ts
 ```
 
 > [!NOTE]
-> - the production default vault is `~/.lyra`; 
-> - development uses `~/.lyra_dev` 
-> - tests use `~/.lyra_test`. 
+>
+> - the production default vault is `~/.lyra`;
+> - development uses `~/.lyra_dev`
+> - tests use `~/.lyra_test`.
 > - set `LYRA_REPO_PATH` to use another vault if needed.
+
+> [!WARNING]
+>
+> First startup takes a while. Lyra loads the local embedding model
+> (multilingual-e5-small, downloaded on first use and cached in
+> `.lyra/models`) and indexes every note in the vault: the bigger the vault,
+> the longer it takes. Progress is logged to `.lyra/logs/`. The index is
+> persisted in `.lyra/embeddings.db`, so the next launches start in seconds
+> and only re-index the notes that changed.
 
 ## Quick Start
 
@@ -205,6 +215,7 @@ Change the theme or language from the Command Palette with `Ctrl+P`.
 
 > [!NOTE]
 > **Known Limitations**
+>
 > - **Platforms:** Linux and macOS, with a true-color terminal.
 > - **Vault scale:** developed and tested on ~10k-note vaults; comfortable up to ~30–50k notes. Startup stays fast at any size (data loads in the background), but scans and caches grow linearly with vault size.
 > - **AI storage:** with optional AI enabled, the RAG index `.lyra/embeddings.db` (SQLite) grows by a few KB per note; the local embedding model is downloaded on first use and cached in `.lyra/models`.

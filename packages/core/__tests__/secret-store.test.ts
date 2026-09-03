@@ -14,8 +14,7 @@ import { getConfig, saveConfig, resetServices } from "../src/helpers";
 
 function createMockKeychain(options?: { failStore?: boolean }) {
   const store = new Map<string, string>();
-  const keyFromSecurityArgs = (args: string[]) =>
-    args[args.indexOf("-a") + 1];
+  const keyFromSecurityArgs = (args: string[]) => args[args.indexOf("-a") + 1];
   const keyFromSecretToolArgs = (args: string[]) =>
     args[args.indexOf("account") + 1];
 

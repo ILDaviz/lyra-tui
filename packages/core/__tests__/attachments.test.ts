@@ -159,11 +159,15 @@ describe("Attachments", () => {
 
     it("should reject paths outside attachments", async () => {
       expect(await resolveAttachmentPath("myday/2026-01-01.md")).toBeNull();
-      expect(await resolveAttachmentPath("https://example.com/x.pdf")).toBeNull();
+      expect(
+        await resolveAttachmentPath("https://example.com/x.pdf"),
+      ).toBeNull();
     });
 
     it("should reject traversal and missing files", async () => {
-      expect(await resolveAttachmentPath("attachments/../secret.txt")).toBeNull();
+      expect(
+        await resolveAttachmentPath("attachments/../secret.txt"),
+      ).toBeNull();
       expect(await resolveAttachmentPath("attachments/missing.pdf")).toBeNull();
     });
   });

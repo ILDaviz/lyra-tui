@@ -51,12 +51,7 @@ export interface WriteMyDayResponse {
 }
 
 export type TodoStatus =
-  | "todo"
-  | "in_progress"
-  | "urgent"
-  | "question"
-  | "paused"
-  | "done";
+  "todo" | "in_progress" | "urgent" | "question" | "paused" | "done";
 
 export interface TodoItem {
   folderName: string;

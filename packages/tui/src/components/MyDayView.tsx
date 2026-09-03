@@ -130,7 +130,10 @@ export function MyDayView(): any {
       setSelectedIndex(0);
       return;
     }
-    const safeIndex = Math.max(0, Math.min(selectedIndex, matchedDates.length - 1));
+    const safeIndex = Math.max(
+      0,
+      Math.min(selectedIndex, matchedDates.length - 1),
+    );
     if (safeIndex !== selectedIndex) {
       setSelectedIndex(safeIndex);
     }
@@ -161,7 +164,9 @@ export function MyDayView(): any {
     }
 
     if (key.name === "up" || key.name === "k") {
-      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : matchedDates.length - 1));
+      setSelectedIndex((prev) =>
+        prev > 0 ? prev - 1 : matchedDates.length - 1,
+      );
     } else if (key.name === "down" || key.name === "j") {
       setSelectedIndex((prev) =>
         prev < matchedDates.length - 1 ? prev + 1 : 0,
@@ -243,99 +248,105 @@ export function MyDayView(): any {
                 const prefix = isSelected ? "▸ " : "  ";
                 const hasContent = datesWithContent.has(dateStr);
 
-            if (isToday) {
-              return (
-                <box
-                  flexDirection="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  width="100%"
-                  borderStyle="rounded"
-                  borderColor={
-                    isSelected ? theme.accent.primary : theme.accent.green
-                  }
-                  backgroundColor={
-                    isSelected ? theme.bg.selected : theme.bg.highlight
-                  }
-                  paddingLeft={1}
-                  paddingRight={1}
-                  marginBottom={1}
-                >
-                  <box flexDirection="row" alignItems="center" gap={1}>
-                    <text
-                      fg={
+                if (isToday) {
+                  return (
+                    <box
+                      flexDirection="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width="100%"
+                      borderStyle="rounded"
+                      borderColor={
                         isSelected ? theme.accent.primary : theme.accent.green
                       }
-                    >
-                      {prefix}
-                    </text>
-                    <text
-                      fg={
-                        isSelected
-                          ? theme.text.highlight
-                          : theme.accent.green
+                      backgroundColor={
+                        isSelected ? theme.bg.selected : theme.bg.highlight
                       }
+                      paddingLeft={1}
+                      paddingRight={1}
+                      marginBottom={1}
                     >
-                      {dateStr}
-                    </text>
-                    <text
-                      fg={
-                        isSelected
-                          ? theme.accent.primaryLight
-                          : theme.accent.green
-                      }
-                    >
-                      {`[${t(keys.MYDAY_TODAY_LABEL).toUpperCase()}]`}
-                    </text>
+                      <box flexDirection="row" alignItems="center" gap={1}>
+                        <text
+                          fg={
+                            isSelected
+                              ? theme.accent.primary
+                              : theme.accent.green
+                          }
+                        >
+                          {prefix}
+                        </text>
+                        <text
+                          fg={
+                            isSelected
+                              ? theme.text.highlight
+                              : theme.accent.green
+                          }
+                        >
+                          {dateStr}
+                        </text>
+                        <text
+                          fg={
+                            isSelected
+                              ? theme.accent.primaryLight
+                              : theme.accent.green
+                          }
+                        >
+                          {`[${t(keys.MYDAY_TODAY_LABEL).toUpperCase()}]`}
+                        </text>
+                      </box>
+
+                      {hasContent ? (
+                        <text fg={theme.accent.primary}>●</text>
+                      ) : null}
+                    </box>
+                  );
+                }
+
+                return (
+                  <box
+                    flexDirection="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    width="100%"
+                    paddingLeft={1}
+                    paddingRight={1}
+                    backgroundColor={isSelected ? theme.bg.selected : undefined}
+                    marginBottom={1}
+                  >
+                    <box flexDirection="row" alignItems="center" gap={1}>
+                      <text
+                        fg={
+                          isSelected
+                            ? theme.accent.primary
+                            : isActive
+                              ? theme.accent.green
+                              : theme.text.dim
+                        }
+                      >
+                        {prefix}
+                      </text>
+                      <text
+                        fg={
+                          isSelected
+                            ? theme.text.highlight
+                            : isActive
+                              ? theme.text.primary
+                              : theme.text.secondary
+                        }
+                      >
+                        {dateStr}
+                      </text>
+                    </box>
+
+                    {hasContent ? (
+                      <text fg={theme.accent.primary}>●</text>
+                    ) : null}
                   </box>
-
-                  {hasContent ? <text fg={theme.accent.primary}>●</text> : null}
-                </box>
-              );
-            }
-
-            return (
-              <box
-                flexDirection="row"
-                justifyContent="space-between"
-                alignItems="center"
-                width="100%"
-                paddingLeft={1}
-                paddingRight={1}
-                backgroundColor={isSelected ? theme.bg.selected : undefined}
-                marginBottom={1}
-              >
-                <box flexDirection="row" alignItems="center" gap={1}>
-                  <text
-                    fg={
-                      isSelected
-                        ? theme.accent.primary
-                        : isActive
-                          ? theme.accent.green
-                          : theme.text.dim
-                    }
-                  >
-                    {prefix}
-                  </text>
-                  <text
-                    fg={
-                      isSelected
-                        ? theme.text.highlight
-                        : isActive
-                          ? theme.text.primary
-                          : theme.text.secondary
-                    }
-                  >
-                    {dateStr}
-                  </text>
-                </box>
-
-                {hasContent ? <text fg={theme.accent.primary}>●</text> : null}
-              </box>
-            );
-                })()
-              )
-            }
+                );
+              })()
+            )
+          }
         />
       </box>
 

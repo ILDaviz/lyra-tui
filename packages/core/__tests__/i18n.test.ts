@@ -54,7 +54,9 @@ describe("Core i18n System", () => {
   it("should return Italian translation when switched to Italian", () => {
     setLocale("it");
     expect(getLocale()).toBe("it");
-    expect(t(CORE_I18N_KEYS.NO_ADDITIONAL_TEXT)).toBe("Nessun testo aggiuntivo");
+    expect(t(CORE_I18N_KEYS.NO_ADDITIONAL_TEXT)).toBe(
+      "Nessun testo aggiuntivo",
+    );
     expect(t(CORE_I18N_KEYS.ERROR_GIT_MISSING)).toBe(
       "Git non è installato o non è presente nel PATH",
     );
@@ -152,11 +154,23 @@ describe("Core i18n System", () => {
 
     const allTerms = i18n.getAllPriorityTerms();
     expect(allTerms).toEqual(
-      expect.arrayContaining(["high", "alta", "medium", "media", "low", "bassa"]),
+      expect.arrayContaining([
+        "high",
+        "alta",
+        "medium",
+        "media",
+        "low",
+        "bassa",
+      ]),
     );
 
-    const { highRegex, lowRegex, mediumRegex, stripPriorityRegex, stripBracketPriorityRegex } =
-      i18n.getPriorityRegexPatterns();
+    const {
+      highRegex,
+      lowRegex,
+      mediumRegex,
+      stripPriorityRegex,
+      stripBracketPriorityRegex,
+    } = i18n.getPriorityRegexPatterns();
 
     expect(highRegex.test("#high")).toBe(true);
     expect(highRegex.test("#alta")).toBe(true);

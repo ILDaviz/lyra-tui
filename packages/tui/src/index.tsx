@@ -20,6 +20,7 @@ import {
   stopAutoSyncScheduler,
 } from "@lyratui/core";
 import { initializeClipboard } from "./clipboard";
+import { t, I18N_KEYS } from "./i18n";
 
 export async function runTui() {
   // OpenTUI hijacks console.* for its internal console viewer, which would
@@ -44,6 +45,10 @@ export async function runTui() {
     // Ctrl+C is a native editor copy shortcut on Linux and must reach Keymap.
     exitOnCtrlC: false,
   });
+  // 17+ components register useKeyboard listeners on the shared keyHandler;
+  // Node's default warning threshold (10) fires during normal multi-view
+  // rendering even though every listener is removed on unmount.
+  renderer.keyInput.setMaxListeners(50);
   const disposeClipboard = initializeClipboard(renderer);
   const keymap = createDefaultOpenTuiKeymap(renderer);
   registerCommaBindings(keymap);
@@ -64,11 +69,15 @@ export async function runTui() {
       destroyTreeSitterClient().catch((err) => {
         console.error("Failed to destroy Tree-sitter client:", err);
       }),
-      Promise.resolve(getEmbeddingService().dispose()).catch((err) => {
-        console.error("Failed to dispose embedding service:", err);
-      }),
+      getEmbeddingService()
+        .dispose()
+        .catch((err) => {
+          console.error("Failed to dispose embedding service:", err);
+        }),
     ]);
-    Promise.race([cleanup, new Promise((resolve) => setTimeout(resolve, 500))])
+    // The embedding dispose checkpoints and closes the SQLite handle (the
+    // worker path is bounded internally); give it room before exiting.
+    Promise.race([cleanup, new Promise((resolve) => setTimeout(resolve, 2500))])
       .catch(() => {})
       .finally(() => {
         flushLogsSync();
@@ -91,19 +100,22 @@ export async function runTui() {
       useAppStore.getState().finishBoot();
 
       // Delay background indexing so early keystrokes stay responsive.
-      setTimeout(
-        () => {
-          getEmbeddingService()
-            .syncIndex()
-            .catch((err) => {
-              console.error(
-                "Failed to synchronize the embeddings index on startup:",
-                err,
-              );
-            });
-        },
-        4000,
-      );
+      setTimeout(() => {
+        useAppStore.getState().setIndexSyncing(true);
+        useAppStore.getState().setStatusMessage(t(I18N_KEYS.STATUS_INDEXING));
+        getEmbeddingService()
+          .syncIndex()
+          .catch((err) => {
+            console.error(
+              "Failed to synchronize the embeddings index on startup:",
+              err,
+            );
+          })
+          .finally(() => {
+            useAppStore.getState().setIndexSyncing(false);
+            useAppStore.getState().setStatusMessage(t(I18N_KEYS.STATUS_READY));
+          });
+      }, 4000);
     } catch (err) {
       console.error("Failed to initialize app data:", err);
       useAppStore.getState().finishBoot();

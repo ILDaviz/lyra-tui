@@ -12,11 +12,7 @@ import {
 import { TodoItem, TodoStatus, WriteNoteResponse } from "../types";
 import * as i18n from "../i18n";
 import { appendNote, readNote, writeNote } from "./notes-service";
-import {
-  cachedFileScan,
-  pruneScanKind,
-  flushScanCache,
-} from "./scan-cache";
+import { cachedFileScan, pruneScanKind, flushScanCache } from "./scan-cache";
 import { listVaultFiles } from "./vault-scan";
 
 export function parseTodoMetadata(text: string): {

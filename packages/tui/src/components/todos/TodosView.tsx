@@ -78,9 +78,7 @@ export function TodosView(): any {
     [fuseTodos],
   );
   const percent =
-    fuseTodos.length > 0
-      ? Math.round((doneCount / fuseTodos.length) * 100)
-      : 0;
+    fuseTodos.length > 0 ? Math.round((doneCount / fuseTodos.length) * 100) : 0;
 
   const statusFilteredTodos = useMemo(() => {
     if (filter === "pending") {

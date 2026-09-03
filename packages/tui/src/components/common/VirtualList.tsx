@@ -90,7 +90,9 @@ export function VirtualList<T>({
   const [scrollRow, setScrollRow] = useState(0);
 
   const heightOf = useMemo(
-    () => (getItemHeight ?? ((() => itemHeight ?? 1) as (item: T, index: number) => number)),
+    () =>
+      getItemHeight ??
+      ((() => itemHeight ?? 1) as (item: T, index: number) => number),
     [getItemHeight, itemHeight],
   );
 

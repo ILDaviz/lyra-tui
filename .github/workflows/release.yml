@@ -47,13 +47,13 @@ jobs:
         if: matrix.target != 'linux-x64'
         run: |
           mkdir -p dist
-          bun build --compile --minify --production packages/tui/bin/lyra-tui.ts --define 'process.env.LYRA_VERSION=${{ toJSON(github.event.release.tag_name || inputs.tag_name || github.ref_name) }}' --outfile dist/${{ matrix.binary_name }}
+          bun scripts/build-bin.ts --define 'process.env.LYRA_VERSION=${{ toJSON(github.event.release.tag_name || inputs.tag_name || github.ref_name) }}' --outfile dist/${{ matrix.binary_name }}
 
       - name: Compile Linux standalone binary
         if: matrix.target == 'linux-x64'
         run: |
           mkdir -p dist
-          bun build --compile --minify --production packages/tui/bin/lyra-tui.ts --define 'process.env.LYRA_VERSION=${{ toJSON(github.event.release.tag_name || inputs.tag_name || github.ref_name) }}' --define 'process.env.OPENTUI_LIBC="glibc"' --outfile dist/${{ matrix.binary_name }}
+          bun scripts/build-bin.ts --define 'process.env.LYRA_VERSION=${{ toJSON(github.event.release.tag_name || inputs.tag_name || github.ref_name) }}' --define 'process.env.OPENTUI_LIBC="glibc"' --outfile dist/${{ matrix.binary_name }}
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

@@ -24,6 +24,7 @@ export function Header(): any {
   }
 
   const isDev = getNodeEnv() === "development";
+  const isIndexSyncing = useAppStore((s) => s.isIndexSyncing);
 
   return (
     <box
@@ -43,6 +44,11 @@ export function Header(): any {
           <b>LYRA</b>
         </text>
         {isDev ? <text fg={theme.accent.primary}>[DEV]</text> : null}
+        {isIndexSyncing ? (
+          <text fg={theme.accent.yellow}>
+            {`[${t(keys.HEADER_INDEX_SYNCING)}]`}
+          </text>
+        ) : null}
         <text fg={theme.text.faint}>│</text>
         <text fg={theme.accent.secondary}>{breadcrumb}</text>
       </box>

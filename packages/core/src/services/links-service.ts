@@ -12,11 +12,7 @@ import {
 import { LinkItem, CommonResponse, RagOptions } from "../types";
 import * as i18n from "../i18n";
 import { resolveNoteFilePath } from "./todos-service";
-import {
-  cachedFileScan,
-  pruneScanKind,
-  flushScanCache,
-} from "./scan-cache";
+import { cachedFileScan, pruneScanKind, flushScanCache } from "./scan-cache";
 import { listVaultFiles } from "./vault-scan";
 
 interface ParsedNoteLinks {
@@ -368,4 +364,3 @@ export async function updateManualLink({
     return { success: false, error: (err as Error).message };
   }
 }
-

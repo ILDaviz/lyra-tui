@@ -10,9 +10,19 @@ interface TodoLike {
 }
 
 const todos: TodoLike[] = [
-  { text: "Fix login bug", noteTitle: "Backend", tags: ["auth"], dueDate: "2026-09-01" },
+  {
+    text: "Fix login bug",
+    noteTitle: "Backend",
+    tags: ["auth"],
+    dueDate: "2026-09-01",
+  },
   { text: "Write docs", noteTitle: "Frontend", tags: ["docs"] },
-  { text: "Refactor parser", noteTitle: "Core", tags: ["cleanup"], dueDate: "2026-08-15" },
+  {
+    text: "Refactor parser",
+    noteTitle: "Core",
+    tags: ["cleanup"],
+    dueDate: "2026-08-15",
+  },
 ];
 
 function makeFuse(items: TodoLike[]): Fuse<TodoLike> {

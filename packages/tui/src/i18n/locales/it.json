@@ -398,6 +398,8 @@
   "95526374-cc3b-4f82-bee9-756784cd4b2c": "Metadati compilati automaticamente con IA",
   "ba040c66-2a7e-4574-8347-e6df5485c909": "Compilazione automatica fallita: {error}",
   "bc44153b-63d9-400e-b8fd-e8c520e536e1": "Lyra sincronizzata",
+  "dffe3e47-1841-442b-a032-0db3842d6993": "Indicizzazione dell'indice…",
+  "a28240d7-2c3f-4258-b75b-29279e266ebb": "Indicizzazione",
   "6665e6a6-7c0d-48d0-a617-95b9fa525353": "Nota senza titolo {id}",
   "89915485-bca3-41ac-88f6-2f299dc97510": "Apri nota nell'editor esterno (Vim / $EDITOR)",
   "5b35d791-286c-4673-b2e3-a08b278da8dd": "Apri nell'editor esterno (Vim / $EDITOR)",

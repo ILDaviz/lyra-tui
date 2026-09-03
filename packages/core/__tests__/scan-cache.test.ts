@@ -58,9 +58,7 @@ describe("Scan Cache (incremental vault scanning)", () => {
     const raw = JSON.parse(await fs.readFile(cachePath, "utf-8"));
     expect(raw.version).toBe(1);
     expect(
-      Object.keys(raw.entries.todos ?? {}).some((p) =>
-        p.endsWith("tasks.md"),
-      ),
+      Object.keys(raw.entries.todos ?? {}).some((p) => p.endsWith("tasks.md")),
     ).toBe(true);
   });
 
@@ -103,9 +101,7 @@ describe("Scan Cache (incremental vault scanning)", () => {
 
     const raw = JSON.parse(await fs.readFile(cachePath, "utf-8"));
     expect(
-      Object.keys(raw.entries.todos ?? {}).some((p) =>
-        p.endsWith("tasks.md"),
-      ),
+      Object.keys(raw.entries.todos ?? {}).some((p) => p.endsWith("tasks.md")),
     ).toBe(false);
   });
 
@@ -124,9 +120,9 @@ describe("Scan Cache (incremental vault scanning)", () => {
     await setCachedScan(cacheKind, readmePath, stat, cached);
 
     const again = await listNotes("CacheDir");
-    expect(
-      again.find((n) => n.filename === "readme.md")?.title,
-    ).toBe("SENTINEL_TITLE");
+    expect(again.find((n) => n.filename === "readme.md")?.title).toBe(
+      "SENTINEL_TITLE",
+    );
   });
 
   it("getLinks caches extracted links per note", async () => {
@@ -146,9 +142,9 @@ describe("Scan Cache (incremental vault scanning)", () => {
     await setCachedScan("links", readmePath, stat, cached);
 
     const again = await getLinks();
-    expect(
-      again.find((l) => l.url === "https://example.com")?.noteTitle,
-    ).toBe("SENTINEL_LINK_NOTE");
+    expect(again.find((l) => l.url === "https://example.com")?.noteTitle).toBe(
+      "SENTINEL_LINK_NOTE",
+    );
   });
 
   it("clearScanCacheFile empties all entries and repopulates from disk", async () => {
@@ -189,8 +185,8 @@ describe("Scan Cache (incremental vault scanning)", () => {
     await flushScanCache();
 
     const raw = JSON.parse(await fs.readFile(cachePath, "utf-8"));
-    const cachedTodos = Object.entries(raw.entries.todos ?? {}).find(
-      ([p]) => p.endsWith("readme.md"),
+    const cachedTodos = Object.entries(raw.entries.todos ?? {}).find(([p]) =>
+      p.endsWith("readme.md"),
     );
     expect(cachedTodos).toBeDefined();
     expect(

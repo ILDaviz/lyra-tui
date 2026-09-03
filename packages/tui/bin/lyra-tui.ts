@@ -1,6 +1,12 @@
 #!/usr/bin/env bun
-import { runCli, initTuiLogging, initEnvironment } from "@lyratui/core";
+import {
+  runCli,
+  initTuiLogging,
+  initEnvironment,
+  EmbeddingService,
+} from "@lyratui/core";
 import { runTui } from "../src/index";
+import { resolveWorkerEntry } from "../src/embedding-worker-entry";
 
 initEnvironment();
 
@@ -18,6 +24,12 @@ process.on("unhandledRejection", (reason) => {
 });
 
 async function main() {
+  // Lets the embedding services spawn their workers from real temp files in
+  // the compiled binary ($bunfs virtual paths are not spawnable): the DB
+  // worker is a single JS file, the AI worker extracts together with the
+  // onnxruntime binding and dylib in the layout ort-node expects.
+  EmbeddingService.setWorkerEntryProvider(resolveWorkerEntry);
+
   const args = process.argv.slice(2);
   const isCli = args.length > 0;
 

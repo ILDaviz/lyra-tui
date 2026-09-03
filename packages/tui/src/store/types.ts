@@ -31,12 +31,7 @@ export interface NoteModalState {
 }
 
 export type BootStepId =
-  | "folders"
-  | "notes"
-  | "myday"
-  | "todos"
-  | "links"
-  | "graph";
+  "folders" | "notes" | "myday" | "todos" | "links" | "graph";
 
 export type BootStepStatus = "pending" | "running" | "done";
 
@@ -57,6 +52,7 @@ export interface UiSlice {
   activeTheme: Theme;
   themeVersion: number;
   statusMessage: string;
+  isIndexSyncing: boolean;
   repoPath: string;
   isCommandPaletteOpen: boolean;
   isHelpOpen: boolean;
@@ -75,6 +71,7 @@ export interface UiSlice {
 
   setTheme: (themeId: string, customTheme?: Theme) => void;
   setStatusMessage: (msg: string) => void;
+  setIndexSyncing: (syncing: boolean) => void;
   setBootStep: (step: BootStepId, status: BootStepStatus) => void;
   finishBoot: () => void;
   setRepoPath: (path: string) => void;

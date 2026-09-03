@@ -23,6 +23,7 @@ export const createUiSlice: StateCreator<AppStoreState, [], [], UiSlice> = (
   activeTheme: getActiveTheme(),
   themeVersion: 0,
   statusMessage: t(I18N_KEYS.STATUS_READY),
+  isIndexSyncing: false,
   repoPath: "",
   isCommandPaletteOpen: false,
   isHelpOpen: false,
@@ -73,6 +74,10 @@ export const createUiSlice: StateCreator<AppStoreState, [], [], UiSlice> = (
 
   setStatusMessage: (msg: string) => {
     set({ statusMessage: msg });
+  },
+
+  setIndexSyncing: (syncing: boolean) => {
+    set({ isIndexSyncing: syncing });
   },
 
   setRepoPath: (path: string) => {

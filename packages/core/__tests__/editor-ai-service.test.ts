@@ -275,7 +275,9 @@ describe("EditorAiService - Writing Actions", () => {
   it("rewrites note content with and without additional instructions using rewrite, riscrivi, and rewriteNote", async () => {
     mockGenerateText
       .mockResolvedValueOnce({ text: "Rewritten note content." })
-      .mockResolvedValueOnce({ text: "Testo memo riscritto secondo istruzioni." })
+      .mockResolvedValueOnce({
+        text: "Testo memo riscritto secondo istruzioni.",
+      })
       .mockResolvedValueOnce({ text: "Note rewritten via rewriteNote." });
 
     const rewritten = await editorAi.rewrite("Original rough note", undefined, {
@@ -357,9 +359,9 @@ describe("LinkMetadataService / autofillLink", () => {
     lookupMock.mockResolvedValue([{ address: "127.0.0.1" }]);
     const fetchMock = vi.spyOn(globalThis, "fetch");
 
-    await expect(
-      autofillLink("http://localhost:3000", {}),
-    ).rejects.toThrow("Local URLs cannot be fetched");
+    await expect(autofillLink("http://localhost:3000", {})).rejects.toThrow(
+      "Local URLs cannot be fetched",
+    );
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

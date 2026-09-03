@@ -469,7 +469,10 @@ export const createFoldersNotesSlice: StateCreator<
       } else if (state.viewMode === "myday" && state.activeMyDayDate) {
         folderName = "myday";
         filename = `${state.activeMyDayDate}.md`;
-      } else if (state.notes.length > 0 && state.notes[state.selectedNoteIndex]) {
+      } else if (
+        state.notes.length > 0 &&
+        state.notes[state.selectedNoteIndex]
+      ) {
         const selNote = state.notes[state.selectedNoteIndex];
         folderName = state.activeFolder;
         filename = selNote.filename;
@@ -522,7 +525,10 @@ export const createFoldersNotesSlice: StateCreator<
         renderer.suspend();
       }
     } catch (suspendErr) {
-      console.error("Failed to suspend renderer for external editor:", suspendErr);
+      console.error(
+        "Failed to suspend renderer for external editor:",
+        suspendErr,
+      );
     }
 
     let spawnError: Error | null = null;
@@ -551,7 +557,9 @@ export const createFoldersNotesSlice: StateCreator<
     if (spawnError) {
       console.error("External editor process failed:", spawnError);
       state.setStatusMessage(
-        t(I18N_KEYS.STATUS_EXTERNAL_EDITOR_FAILED, { error: spawnError.message }),
+        t(I18N_KEYS.STATUS_EXTERNAL_EDITOR_FAILED, {
+          error: spawnError.message,
+        }),
       );
       return false;
     }
@@ -607,7 +615,9 @@ export const createFoldersNotesSlice: StateCreator<
     } catch (reloadErr: any) {
       console.error("Failed to reload note after external editor:", reloadErr);
       get().setStatusMessage(
-        t(I18N_KEYS.STATUS_EXTERNAL_EDITOR_FAILED, { error: reloadErr.message }),
+        t(I18N_KEYS.STATUS_EXTERNAL_EDITOR_FAILED, {
+          error: reloadErr.message,
+        }),
       );
       return false;
     }

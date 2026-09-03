@@ -131,19 +131,17 @@ export const createTodosLinksMyDaySlice: StateCreator<
         scanLinksForFile(folderName, filename),
       ]);
       set((state) => {
-        const sameFile = (
-          item: { folderName?: string; filename?: string },
-        ): boolean =>
+        const sameFile = (item: {
+          folderName?: string;
+          filename?: string;
+        }): boolean =>
           item.folderName === folderName && item.filename === filename;
 
         const merge = <T extends { folderName?: string; filename?: string }>(
           current: T[],
           fresh: T[],
         ): T[] => {
-          if (
-            current.every((item) => !sameFile(item)) &&
-            fresh.length === 0
-          ) {
+          if (current.every((item) => !sameFile(item)) && fresh.length === 0) {
             return current;
           }
           const firstIdx = current.findIndex((item) => sameFile(item));

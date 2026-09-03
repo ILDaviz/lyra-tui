@@ -18,7 +18,9 @@ export function TodoStatusBadge({ todo, theme }: TodoStatusBadgeProps): any {
       return <text fg={theme.status.question}>[?]</text>;
     case "paused":
     case "cancelled" as any:
-      return <text fg={theme.status.paused || theme.status.cancelled}>[-]</text>;
+      return (
+        <text fg={theme.status.paused || theme.status.cancelled}>[-]</text>
+      );
     case "done":
       return <text fg={theme.status.done}>[✓]</text>;
     case "todo":

@@ -63,3 +63,6 @@ coverage/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Native library staged for the compiled binary (see scripts/prepare-onnx-dylib.ts)
+packages/tui/assets/

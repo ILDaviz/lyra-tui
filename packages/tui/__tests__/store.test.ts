@@ -321,7 +321,9 @@ describe("Zustand AppStore & State Slices", () => {
         expect(mockRenderer.resume).toHaveBeenCalledTimes(1);
         expect(suspended).toBe(true);
         expect(resumed).toBe(true);
-        expect(useAppStore.getState().statusMessage).toContain("Note opened and updated");
+        expect(useAppStore.getState().statusMessage).toContain(
+          "Note opened and updated",
+        );
       } finally {
         if (originalEditor !== undefined) {
           process.env.EDITOR = originalEditor;

@@ -459,8 +459,7 @@ Links back to [[Project Alpha]].
       expect(soloNode?.tags).toContain("fresh");
       expect(
         rebuilt.edges.some(
-          (e) =>
-            e.source === "solo.md" && e.target === "unresolved:Ghost Note",
+          (e) => e.source === "solo.md" && e.target === "unresolved:Ghost Note",
         ),
       ).toBe(true);
     });

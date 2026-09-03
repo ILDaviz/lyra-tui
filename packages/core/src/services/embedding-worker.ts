@@ -3,10 +3,19 @@ import { EmbeddingDb } from "./embedding-db-core";
 
 interface WorkerRequest {
   id: number;
-  type: "load" | "replaceNote" | "removeNote" | "search" | "getIndexedFiles" | "save";
+  type:
+    | "load"
+    | "replaceNote"
+    | "removeNote"
+    | "search"
+    | "getIndexedFiles"
+    | "getFilesMissingVectors"
+    | "save"
+    | "close";
   dimension?: number;
   relativeFilePath?: string;
   docs?: any[];
+  force?: boolean;
   searchParams?: any;
   limit?: number;
 }
@@ -18,7 +27,7 @@ if (!parentPort) {
 const port = parentPort;
 const db = new EmbeddingDb(workerData.indexPath as string);
 
-// Messages are handled strictly sequentially: Orama state is mutated in the
+// Messages are handled strictly sequentially: database state is mutated in the
 // exact order the main thread issued requests.
 let chain: Promise<void> = Promise.resolve();
 
@@ -27,15 +36,25 @@ function handle(msg: WorkerRequest): Promise<any> {
     case "load":
       return db.load(msg.dimension ?? 384);
     case "replaceNote":
-      return db.replaceNote(msg.relativeFilePath!, msg.docs ?? []);
+      return db.replaceNote(
+        msg.relativeFilePath!,
+        msg.docs ?? [],
+        msg.force === true,
+      );
     case "removeNote":
       return db.removeNote(msg.relativeFilePath!);
     case "search":
       return db.search(msg.searchParams, msg.limit ?? 10);
     case "getIndexedFiles":
       return db.getIndexedFiles();
+    case "getFilesMissingVectors":
+      return db.getFilesMissingVectors();
     case "save":
       return db.save();
+    case "close":
+      return db.save().then(() => {
+        db.close();
+      });
     default:
       throw new Error(`Unknown message type: ${(msg as any).type}`);
   }

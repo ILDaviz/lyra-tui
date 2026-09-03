@@ -1,4 +1,5 @@
 import * as fs from "fs/promises";
+import * as os from "os";
 import * as path from "path";
 import { Worker } from "worker_threads";
 import { getRepoPath, getMyDayPath, exists } from "../helpers";
@@ -6,10 +7,24 @@ import {
   EmbeddingDb,
   EmbeddingDoc,
   SearchResultItem,
+  legacyEmbeddingJsonPath,
 } from "./embedding-db-core";
 
 function yieldToEventLoop(): Promise<void> {
   return new Promise<void>((resolve) => setImmediate(resolve));
+}
+
+/**
+ * Texts per inference call. The ONNX runtime parallelizes a batched forward
+ * pass across cores, so sizing the batch on the CPU keeps every core busy
+ * during the initial indexing of large vaults. Override with
+ * LYRA_EMBEDDING_BATCH.
+ */
+export function embeddingBatchSize(): number {
+  const override = Number.parseInt(process.env.LYRA_EMBEDDING_BATCH ?? "", 10);
+  if (Number.isFinite(override) && override > 0) return override;
+  const cpus = os.availableParallelism();
+  return Math.min(32, Math.max(8, cpus * 2));
 }
 
 type WorkerRequestType =
@@ -18,7 +33,11 @@ type WorkerRequestType =
   | "removeNote"
   | "search"
   | "getIndexedFiles"
-  | "save";
+  | "getFilesMissingVectors"
+  | "save"
+  | "close";
+
+const WORKER_CLOSE_TIMEOUT_MS = 1000;
 
 interface PendingRpc {
   resolve: (value: any) => void;
@@ -26,29 +45,52 @@ interface PendingRpc {
 }
 
 type Backend =
-  | { kind: "worker"; worker: Worker }
-  | { kind: "thread"; db: EmbeddingDb };
+  { kind: "worker"; worker: Worker } | { kind: "thread"; db: EmbeddingDb };
 
 export class EmbeddingService {
   private static readonly VECTOR_SIMILARITY_THRESHOLD = 0.3;
 
-  private extractor: any = null;
+  /**
+   * Injected by the host (packages/tui/src/embedding-worker-entry.ts) so the
+   * compiled binary can extract a bundled worker instead of spawning from
+   * the $bunfs virtual filesystem. The provider receives the worker asset
+   * name. Null in tests/dev: the direct URLs work there, or the fallbacks
+   * take over.
+   */
+  private static workerEntryProvider:
+    ((assetName: string) => Promise<string | null>) | null = null;
+
+  public static setWorkerEntryProvider(
+    provider: (assetName: string) => Promise<string | null>,
+  ): void {
+    EmbeddingService.workerEntryProvider = provider;
+  }
+
   private indexPath: string;
   private isInitialized = false;
-  private initialization: Promise<void> | null = null;
+  private initialization: Promise<boolean> | null = null;
   private mutationQueue: Promise<void> = Promise.resolve();
 
   private backend: Backend | null = null;
   private backendLoading: Promise<void> | null = null;
   private workerBroken = false;
+  private disposed = false;
   private rpcId = 0;
   private pendingRpcs = new Map<number, PendingRpc>();
+
+  // AI worker: model inference never runs on the main thread. There is no
+  // in-thread fallback on purpose: if the worker cannot spawn, the service
+  // degrades to fulltext-only instead of blocking the TUI with inference.
+  private aiWorker: Worker | null = null;
+  private aiWorkerBroken = false;
+  private aiRpcId = 0;
+  private aiPendingRpcs = new Map<number, PendingRpc>();
 
   private isAvailable = true;
   private initError: any = null;
 
   constructor() {
-    this.indexPath = path.join(getRepoPath(), ".lyra", "embeddings.json");
+    this.indexPath = path.join(getRepoPath(), ".lyra", "embeddings.db");
   }
 
   public async init(): Promise<boolean> {
@@ -59,32 +101,17 @@ export class EmbeddingService {
           console.log(
             "Initializing local embedding model (multilingual-e5-small)...",
           );
-          const transformersModule: any = await import("@xenova/transformers");
-          const transformers: any =
-            transformersModule.default?.pipeline || transformersModule.default?.env
-              ? transformersModule.default
-              : transformersModule;
-          const pipeline = transformers.pipeline || transformersModule.pipeline;
-          const env = transformers.env || transformersModule.env;
-
-          const repoPath = getRepoPath();
-          if (env) {
-            env.cacheDir = path.join(repoPath, ".lyra", "models");
-          }
-
-          if (typeof pipeline !== "function") {
-            throw new Error(
-              "Transformers pipeline is not available in the current environment.",
-            );
-          }
-
-          this.extractor = await pipeline(
-            "feature-extraction",
-            "Xenova/multilingual-e5-small",
+          const worker = await this.startAiWorker();
+          const result = await this.aiRpc<{ backend: string }>(
+            worker,
+            "load",
+            {},
           );
           this.isInitialized = true;
           this.isAvailable = true;
-          console.log("Local embedding model loaded successfully.");
+          console.log(
+            `Local embedding model loaded successfully (backend: ${result.backend}).`,
+          );
         } catch (err: any) {
           console.warn(
             "Local embedding model could not be loaded; fulltext search will be used as fallback:",
@@ -94,30 +121,179 @@ export class EmbeddingService {
           this.isAvailable = false;
           this.initError = err;
         }
+        return this.isAvailable;
       })();
     }
 
-    await this.initialization;
-    return this.isAvailable;
+    return this.initialization;
   }
 
-  public dispose(): void {
+  private async startAiWorker(): Promise<Worker> {
+    if (this.aiWorker) return this.aiWorker;
+    if (this.aiWorkerBroken) {
+      throw new Error("AI worker is unavailable");
+    }
+    try {
+      const provider = EmbeddingService.workerEntryProvider;
+      const entry = provider
+        ? await provider("embedding-ai-worker.js.txt")
+        : null;
+      const worker = new Worker(
+        entry ?? new URL("./embedding-ai-worker.ts", import.meta.url),
+        {
+          workerData: {
+            cacheDir: path.join(getRepoPath(), ".lyra", "models"),
+          },
+        },
+      );
+      worker.unref();
+      worker.on("message", (msg: any) => {
+        const pending = this.aiPendingRpcs.get(msg?.id);
+        if (!pending) return;
+        this.aiPendingRpcs.delete(msg.id);
+        if (msg.ok) {
+          pending.resolve(msg.result);
+        } else {
+          pending.reject(new Error(msg.error || "AI worker error"));
+        }
+      });
+      worker.on("error", (err: Error) => this.handleAiWorkerFailure(err));
+      worker.on("exit", () => {
+        if (this.aiWorker === worker) {
+          this.handleAiWorkerFailure(new Error("AI worker exited"));
+        }
+      });
+      this.aiWorker = worker;
+      return worker;
+    } catch (err: any) {
+      this.aiWorkerBroken = true;
+      throw new Error(`AI worker unavailable: ${err?.message || err}`, {
+        cause: err,
+      });
+    }
+  }
+
+  private handleAiWorkerFailure(err: Error): void {
+    if (!this.aiWorker) return;
+    console.warn(
+      "AI worker failed; fulltext search will be used as fallback:",
+      err?.message || err,
+    );
+    this.aiWorkerBroken = true;
+    this.aiWorker = null;
+    const pending = this.aiPendingRpcs;
+    this.aiPendingRpcs = new Map();
+    for (const { reject } of pending.values()) {
+      reject(new Error("AI worker failed"));
+    }
+  }
+
+  private async aiDispatch<T = any>(
+    type: "load" | "embed" | "close",
+    payload: Record<string, unknown> = {},
+  ): Promise<T> {
+    if (this.disposed) {
+      throw new Error("embedding service has been disposed");
+    }
+    const worker = await this.startAiWorker();
+    return this.aiRpc<T>(worker, type, payload);
+  }
+
+  private aiRpc<T = any>(
+    worker: Worker,
+    type: "load" | "embed" | "close",
+    payload: Record<string, unknown> = {},
+  ): Promise<T> {
+    const id = ++this.aiRpcId;
+    return new Promise<T>((resolve, reject) => {
+      this.aiPendingRpcs.set(id, { resolve, reject });
+      worker.postMessage({ id, type, ...payload });
+    });
+  }
+
+  /**
+   * Embeds a batch of texts in a single inference call on the AI worker.
+   * The ONNX runtime parallelizes the batched pass across cores, so callers
+   * should batch as many texts as possible (see embeddingBatchSize).
+   * Returns one vector per input; empty vectors mean the model is
+   * unavailable (fulltext-only fallback) or the call failed.
+   */
+  public async embedTexts(
+    texts: string[],
+    prefix: "query" | "passage" = "passage",
+  ): Promise<number[][]> {
+    if (texts.length === 0) return [];
+    const available = await this.init();
+    if (!available) return texts.map(() => []);
+    try {
+      const vectors = await this.aiDispatch<number[][]>("embed", {
+        texts,
+        prefix,
+      });
+      // Defensive: keep positional alignment even on partial results.
+      return texts.map((_, i) => vectors[i] ?? []);
+    } catch (err) {
+      console.warn("Error generating embeddings, skipping vectors:", err);
+      return texts.map(() => []);
+    }
+  }
+
+  public async dispose(): Promise<void> {
+    this.disposed = true;
     const backend = this.backend;
     this.backend = null;
     this.backendLoading = null;
     this.initialization = null;
     this.isInitialized = false;
-    this.extractor = null;
-    if (backend?.kind === "worker") {
-      try {
-        void backend.worker.terminate();
-      } catch {}
+
+    const aiWorker = this.aiWorker;
+    this.aiWorker = null;
+    const aiPending = this.aiPendingRpcs;
+    this.aiPendingRpcs = new Map();
+    for (const { reject } of aiPending.values()) {
+      reject(new Error("embedding service disposed"));
     }
+    if (aiWorker) {
+      // Best-effort close; do NOT terminate the AI worker. Terminating a
+      // worker with the onnxruntime native module loaded trips a NAPI panic
+      // in Bun ("Error::New napi_create_error", exit signal SIGTRAP). The
+      // worker is unref'd, so it never holds the event loop: the process
+      // exit reclaims it safely.
+      const closeRpc = this.aiRpc(aiWorker, "close", {});
+      closeRpc.catch(() => {});
+      await Promise.race([
+        closeRpc,
+        new Promise((resolve) => setTimeout(resolve, WORKER_CLOSE_TIMEOUT_MS)),
+      ]).catch(() => {});
+    }
+
     const pending = this.pendingRpcs;
     this.pendingRpcs = new Map();
     for (const { reject } of pending.values()) {
       reject(new Error("embedding service disposed"));
     }
+
+    if (!backend) return;
+
+    if (backend.kind === "thread") {
+      try {
+        backend.db.close();
+      } catch {}
+      return;
+    }
+
+    const closeRpc = this.rpc(backend.worker, "close", {});
+    // Rejections after the timeout won the race would otherwise be unhandled.
+    closeRpc.catch(() => {});
+    try {
+      await Promise.race([
+        closeRpc,
+        new Promise((resolve) => setTimeout(resolve, WORKER_CLOSE_TIMEOUT_MS)),
+      ]);
+    } catch {}
+    try {
+      backend.worker.terminate();
+    } catch {}
   }
 
   private handleWorkerFailure(err: Error): void {
@@ -147,13 +323,24 @@ export class EmbeddingService {
   }
 
   private async startBackend(): Promise<void> {
-    // Detect the embedding dimension up-front only when the index file does
-    // not exist yet (same behavior as the previous in-thread loader).
+    if (this.disposed) {
+      throw new Error("embedding service has been disposed");
+    }
+    // Detect the embedding dimension up-front only when no index exists yet
+    // (neither the SQLite database nor a legacy JSON snapshot to migrate, as
+    // the migration derives the dimension from the stored vectors).
     let dimension = 384;
-    let missingIndex = false;
+    let missingIndex = true;
     try {
       missingIndex = !(await exists(this.indexPath));
     } catch {}
+    if (missingIndex) {
+      try {
+        if (await exists(legacyEmbeddingJsonPath(this.indexPath))) {
+          missingIndex = false;
+        }
+      } catch {}
+    }
     if (missingIndex) {
       try {
         const dummyEmbedding = await this.getEmbedding("test");
@@ -170,8 +357,16 @@ export class EmbeddingService {
 
     if (!this.workerBroken && process.env.LYRA_EMBEDDING_THREAD !== "1") {
       try {
+        // In the compiled binary the worker cannot be spawned from the
+        // $bunfs virtual filesystem; the injected provider extracts an
+        // embedded bundle to a real temp file instead. Null keeps the
+        // direct URL (development) or triggers the in-thread fallback.
+        const provider = EmbeddingService.workerEntryProvider;
+        const workerEntry = provider
+          ? await provider("embedding-worker.js.txt")
+          : null;
         const worker = new Worker(
-          new URL("./embedding-worker.ts", import.meta.url),
+          workerEntry ?? new URL("./embedding-worker.ts", import.meta.url),
           { workerData: { indexPath: this.indexPath } },
         );
         worker.unref();
@@ -229,11 +424,10 @@ export class EmbeddingService {
           return (await db.replaceNote(
             payload.relativeFilePath as string,
             (payload.docs as EmbeddingDoc[]) ?? [],
+            payload.force === true,
           )) as T;
         case "removeNote":
-          return (await db.removeNote(
-            payload.relativeFilePath as string,
-          )) as T;
+          return (await db.removeNote(payload.relativeFilePath as string)) as T;
         case "search":
           return (await db.search(
             payload.searchParams,
@@ -241,16 +435,33 @@ export class EmbeddingService {
           )) as T;
         case "getIndexedFiles":
           return (await db.getIndexedFiles()) as T;
+        case "getFilesMissingVectors":
+          return (await db.getFilesMissingVectors()) as T;
         case "save":
           await db.save();
+          return undefined as T;
+        case "close":
+          await db.save();
+          db.close();
           return undefined as T;
       }
     }
 
+    if (backend.kind !== "worker") {
+      throw new Error("embedding backend is not available");
+    }
+    return this.rpc<T>(backend.worker, type, payload);
+  }
+
+  private rpc<T = any>(
+    worker: Worker,
+    type: WorkerRequestType,
+    payload: Record<string, unknown> = {},
+  ): Promise<T> {
     const id = ++this.rpcId;
     return new Promise<T>((resolve, reject) => {
       this.pendingRpcs.set(id, { resolve, reject });
-      backend.worker.postMessage({ id, type, ...payload });
+      worker.postMessage({ id, type, ...payload });
     });
   }
 
@@ -263,28 +474,16 @@ export class EmbeddingService {
     return result;
   }
 
+  /**
+   * Single-text convenience wrapper over embedTexts. Inference happens on
+   * the AI worker; prefer embedTexts for bulk work.
+   */
   public async getEmbedding(
     text: string,
     type: "query" | "passage" = "query",
   ): Promise<number[]> {
-    const available = await this.init();
-    if (!available || !this.extractor) {
-      return [];
-    }
-    try {
-      const formattedText =
-        text.startsWith("query: ") || text.startsWith("passage: ")
-          ? text
-          : `${type}: ${text}`;
-      const output = await this.extractor(formattedText, {
-        pooling: "mean",
-        normalize: true,
-      });
-      return Array.from(output.data);
-    } catch (err) {
-      console.warn("Error generating embedding, skipping vector:", err);
-      return [];
-    }
+    const [vector] = await this.embedTexts([text], type);
+    return vector ?? [];
   }
 
   public async indexNote(
@@ -293,7 +492,7 @@ export class EmbeddingService {
     folder: string,
     content: string,
     updatedAt: number,
-    persist = true,
+    _persist = true,
   ): Promise<void> {
     return this.enqueueMutation(() =>
       this.indexNoteInternal(
@@ -302,9 +501,41 @@ export class EmbeddingService {
         folder,
         content,
         updatedAt,
-        persist,
+        _persist,
       ),
     );
+  }
+
+  /**
+   * Chunks a note and returns its embedding docs without vectors. Shared by
+   * the single-note and the bulk (sync) paths; callers attach vectors in
+   * batched inference calls.
+   */
+  private buildNoteDocs(
+    relativeFilePath: string,
+    title: string,
+    folder: string,
+    content: string,
+    updatedAt: number,
+  ): {
+    chunks: Array<{ rawText: string; embeddedText: string }>;
+    docs: EmbeddingDoc[];
+  } {
+    const chunks = this.chunkTextWithContext(content, title, 600, 150);
+    if (chunks.length === 0) {
+      chunks.push({
+        rawText: title,
+        embeddedText: `Document: ${title}\n\n${title}`,
+      });
+    }
+    const docs: EmbeddingDoc[] = chunks.map((chunk) => ({
+      relativeFilePath,
+      title,
+      folder,
+      text: chunk.rawText,
+      updatedAt,
+    }));
+    return { chunks, docs };
   }
 
   private async indexNoteInternal(
@@ -313,57 +544,42 @@ export class EmbeddingService {
     folder: string,
     content: string,
     updatedAt: number,
-    persist = true,
+    // Persisted eagerly since the SQLite backend commits every mutation.
+    _persist = true,
+    // Bypasses replaceNote's mtime skip (used by the vector backfill, which
+    // rewrites unchanged notes whose chunks lack stored vectors).
+    force = false,
   ): Promise<void> {
-    const chunksWithContext = this.chunkTextWithContext(
-      content,
+    const { chunks, docs } = this.buildNoteDocs(
+      relativeFilePath,
       title,
-      600,
-      150,
+      folder,
+      content,
+      updatedAt,
     );
 
-    if (chunksWithContext.length === 0) {
-      const contextPrefix = `Document: ${title}\n\n`;
-      chunksWithContext.push({
-        rawText: title,
-        embeddedText: contextPrefix + title,
-      });
-    }
-
-    const docs: EmbeddingDoc[] = [];
-    for (const chunk of chunksWithContext) {
-      const embedding = await this.getEmbedding(chunk.embeddedText, "passage");
-      const doc: EmbeddingDoc = {
-        relativeFilePath,
-        title,
-        folder,
-        text: chunk.rawText,
-        updatedAt,
-      };
-      if (embedding && embedding.length > 0) {
-        doc.embedding = embedding;
+    // One batched inference call for the whole note.
+    const vectors = await this.embedTexts(
+      chunks.map((chunk) => chunk.embeddedText),
+      "passage",
+    );
+    docs.forEach((doc, i) => {
+      const vector = vectors[i];
+      if (vector && vector.length > 0) {
+        doc.embedding = vector;
       }
-      docs.push(doc);
-      // Inference blocks the main thread per chunk; yield between chunks so
-      // keystrokes and rendering are serviced during multi-chunk notes.
-      await yieldToEventLoop();
-    }
+    });
 
     const result = await this.dispatch<{
       removedCount: number;
       skipped: boolean;
-    }>("replaceNote", { relativeFilePath, docs });
+    }>("replaceNote", { relativeFilePath, docs, force });
 
     if (result.skipped) {
       return;
     }
 
-    if (persist) {
-      await this.dispatch("save");
-    }
-    console.log(
-      `Indexed note in Orama: ${relativeFilePath} (${chunksWithContext.length} chunks)`,
-    );
+    console.log(`Indexed note: ${relativeFilePath} (${chunks.length} chunks)`);
   }
 
   public async removeNote(relativeFilePath: string): Promise<void> {
@@ -374,18 +590,15 @@ export class EmbeddingService {
 
   private async removeNoteInternal(
     relativeFilePath: string,
-    persist = true,
+    _persist = true,
   ): Promise<void> {
     const result = await this.dispatch<{ removedCount: number }>("removeNote", {
       relativeFilePath,
     });
 
     if (result.removedCount > 0) {
-      if (persist) {
-        await this.dispatch("save");
-      }
       console.log(
-        `Removed note from Orama index: ${relativeFilePath} (${result.removedCount} chunks)`,
+        `Removed note from index: ${relativeFilePath} (${result.removedCount} chunks)`,
       );
     }
   }
@@ -450,27 +663,9 @@ export class EmbeddingService {
     console.log("Starting index synchronization...");
     const rootPath = getRepoPath();
     let indexedCount = 0;
-    let dirty = false;
-    let unsavedChanges = 0;
 
-    // Persist serializes the whole database; keep it throttled so the worker
-    // is not flooded and disk writes stay rare.
-    const SAVE_MAX_PENDING_CHANGES = 1000;
-    const SAVE_MIN_INTERVAL_MS = 15_000;
-    let lastSaveAt = performance.now();
-
-    const checkpoint = async () => {
-      const dueToVolume = unsavedChanges >= SAVE_MAX_PENDING_CHANGES;
-      const dueToTime =
-        unsavedChanges > 0 &&
-        performance.now() - lastSaveAt >= SAVE_MIN_INTERVAL_MS;
-      if (dueToVolume || dueToTime) {
-        await this.dispatch("save");
-        unsavedChanges = 0;
-        lastSaveAt = performance.now();
-      }
-    };
-
+    // The SQLite backend persists every mutation transactionally, so sync
+    // needs no snapshot throttling or explicit save passes.
     const filesOnDisk = new Set<string>();
 
     const getTitleFromContent = (content: string, filename: string): string => {
@@ -483,10 +678,64 @@ export class EmbeddingService {
     };
 
     try {
-      const indexedEntries = await this.dispatch<
-        Array<[string, number]>
-      >("getIndexedFiles");
+      const indexedEntries =
+        await this.dispatch<Array<[string, number]>>("getIndexedFiles");
       const indexedFiles = new Map<string, number>(indexedEntries);
+
+      // Bulk batching: notes are chunked as they are scanned and buffered;
+      // when enough texts are pending, a single inference call embeds them
+      // together (the ONNX runtime parallelizes the batch across cores).
+      const batchSize = embeddingBatchSize();
+      let buffer: Array<{
+        relativePath: string;
+        title: string;
+        folder: string;
+        updatedAt: number;
+        chunks: Array<{ rawText: string; embeddedText: string }>;
+      }> = [];
+      let pendingTexts = 0;
+
+      const flushBuffer = async () => {
+        if (buffer.length === 0) return;
+        try {
+          const allTexts: string[] = [];
+          for (const entry of buffer) {
+            for (const chunk of entry.chunks) {
+              allTexts.push(chunk.embeddedText);
+            }
+          }
+          const vectors = await this.embedTexts(allTexts, "passage");
+          let offset = 0;
+          for (const entry of buffer) {
+            const docs: EmbeddingDoc[] = entry.chunks.map((chunk, i) => {
+              const vector = vectors[offset + i] ?? [];
+              offset++;
+              return {
+                relativeFilePath: entry.relativePath,
+                title: entry.title,
+                folder: entry.folder,
+                text: chunk.rawText,
+                updatedAt: entry.updatedAt,
+                ...(vector.length > 0 ? { embedding: vector } : {}),
+              };
+            });
+            await this.dispatch("replaceNote", {
+              relativeFilePath: entry.relativePath,
+              docs,
+            });
+            indexedCount++;
+            console.log(
+              `Indexed note: ${entry.relativePath} (${entry.chunks.length} chunks)`,
+            );
+          }
+        } catch (err) {
+          console.error("Error indexing buffered notes:", err);
+        }
+        buffer = [];
+        pendingTexts = 0;
+        // Keep keystrokes and rendering serviced during bulk indexing.
+        await yieldToEventLoop();
+      };
 
       const scanDir = async (dirPath: string, folderName: string) => {
         if (!(await exists(dirPath))) return;
@@ -508,18 +757,24 @@ export class EmbeddingService {
               try {
                 const content = await fs.readFile(fullPath, "utf-8");
                 const title = getTitleFromContent(content, entry.name);
-                await this.indexNoteInternal(
+                const { chunks } = this.buildNoteDocs(
                   relativePath,
                   title,
                   folderName,
                   content,
                   stats.mtimeMs,
-                  false,
                 );
-                indexedCount++;
-                dirty = true;
-                unsavedChanges++;
-                await checkpoint();
+                buffer.push({
+                  relativePath,
+                  title,
+                  folder: folderName,
+                  updatedAt: stats.mtimeMs,
+                  chunks,
+                });
+                pendingTexts += chunks.length;
+                if (pendingTexts >= batchSize) {
+                  await flushBuffer();
+                }
               } catch (err) {
                 console.error(`Error indexing file ${relativePath}:`, err);
               }
@@ -541,74 +796,29 @@ export class EmbeddingService {
       const myDayPath = getMyDayPath();
       await scanDir(myDayPath, "myday");
 
-      const linksJsonPath = path.join(rootPath, "links.json");
-      if (await exists(linksJsonPath)) {
-        try {
-          const stats = await fs.stat(linksJsonPath);
-          filesOnDisk.add("links.json");
+      await flushBuffer();
 
-          const indexedMtime = indexedFiles.get("links.json");
-          if (indexedMtime === undefined || indexedMtime !== stats.mtimeMs) {
-            const linksContent = await fs.readFile(linksJsonPath, "utf-8");
-            const parsedLinks = JSON.parse(linksContent);
-            if (Array.isArray(parsedLinks)) {
-              const docs: EmbeddingDoc[] = [];
-              for (const link of parsedLinks) {
-                const linkTitle = link.title || link.url;
-                const linkText = `Link URL: ${link.url}\nDescription: ${
-                  link.description || ""
-                }\nTags: ${(link.tags || []).join(", ")}`;
-
-                const embedding = await this.getEmbedding(
-                  `Link: ${linkTitle}\n${linkText}`,
-                  "passage",
-                );
-                const doc: EmbeddingDoc = {
-                  relativeFilePath: "links.json",
-                  title: `Link: ${linkTitle}`,
-                  folder: "links",
-                  text: linkText,
-                  updatedAt: stats.mtimeMs,
-                };
-                if (embedding && embedding.length > 0) {
-                  doc.embedding = embedding;
-                }
-                docs.push(doc);
-              }
-
-              await this.dispatch("replaceNote", {
-                relativeFilePath: "links.json",
-                docs,
-              });
-              indexedCount++;
-              dirty = true;
-              unsavedChanges++;
-              console.log(
-                `Indexed manual links from links.json in Orama (${parsedLinks.length} links)`,
-              );
-            }
-          }
-        } catch (err) {
-          console.error("Error indexing links.json:", err);
-        }
+      filesOnDisk.add("links.json");
+      if (await this.indexLinksFile(indexedFiles)) {
+        indexedCount++;
       }
+
+      // Backfill pass: notes indexed while the local model was unavailable
+      // (or migrated from the legacy JSON snapshot) have chunks without
+      // vectors; regenerate them once the model is reachable. After this
+      // single pass the mtime skip governs as usual.
+      indexedCount += await this.backfillMissingVectors();
 
       let removedCount = 0;
       for (const relativePath of indexedFiles.keys()) {
         if (!filesOnDisk.has(relativePath)) {
           await this.removeNoteInternal(relativePath, false);
           removedCount++;
-          dirty = true;
-          unsavedChanges++;
         }
       }
 
       if (removedCount > 0) {
         console.log(`Cleaned up ${removedCount} stale entries from index.`);
-      }
-
-      if (dirty) {
-        await this.dispatch("save");
       }
 
       console.log(
@@ -619,6 +829,135 @@ export class EmbeddingService {
       console.error("Index synchronization failed:", err);
       return { success: false, indexedCount };
     }
+  }
+
+  /**
+   * Indexes links.json. Pass the sync's indexedFiles map to honor the
+   * mtime skip, or null to force a full re-index (backfill).
+   */
+  private async indexLinksFile(
+    indexedFiles: Map<string, number> | null,
+  ): Promise<boolean> {
+    const linksJsonPath = path.join(getRepoPath(), "links.json");
+    if (!(await exists(linksJsonPath))) return false;
+    try {
+      const stats = await fs.stat(linksJsonPath);
+      if (indexedFiles) {
+        const indexedMtime = indexedFiles.get("links.json");
+        if (indexedMtime !== undefined && indexedMtime === stats.mtimeMs) {
+          return false;
+        }
+      }
+
+      const linksContent = await fs.readFile(linksJsonPath, "utf-8");
+      const parsedLinks = JSON.parse(linksContent);
+      if (!Array.isArray(parsedLinks)) return false;
+
+      const texts: string[] = [];
+      const docs: EmbeddingDoc[] = [];
+      for (const link of parsedLinks) {
+        const linkTitle = link.title || link.url;
+        const linkText = `Link URL: ${link.url}\nDescription: ${
+          link.description || ""
+        }\nTags: ${(link.tags || []).join(", ")}`;
+        texts.push(`Link: ${linkTitle}\n${linkText}`);
+        docs.push({
+          relativeFilePath: "links.json",
+          title: `Link: ${linkTitle}`,
+          folder: "links",
+          text: linkText,
+          updatedAt: stats.mtimeMs,
+        });
+      }
+
+      // One batched inference call for all links.
+      const vectors = await this.embedTexts(texts, "passage");
+      docs.forEach((doc, i) => {
+        const vector = vectors[i];
+        if (vector && vector.length > 0) {
+          doc.embedding = vector;
+        }
+      });
+
+      await this.dispatch("replaceNote", {
+        relativeFilePath: "links.json",
+        docs,
+      });
+      console.log(
+        `Indexed manual links from links.json (${parsedLinks.length} links)`,
+      );
+      return true;
+    } catch (err) {
+      console.error("Error indexing links.json:", err);
+      return false;
+    }
+  }
+
+  /**
+   * Re-embeds every indexed file that still has chunks without vectors
+   * (model was unavailable when it was indexed, or it came from the legacy
+   * JSON migration which carried no vectors). No-op when the model is not
+   * available. Returns the number of files repaired.
+   */
+  private async backfillMissingVectors(): Promise<number> {
+    const available = await this.init();
+    if (!available) return 0;
+
+    let missing: string[];
+    try {
+      missing = await this.dispatch<string[]>("getFilesMissingVectors", {});
+    } catch (err) {
+      console.warn("Unable to query chunks missing vectors:", err);
+      return 0;
+    }
+    if (missing.length === 0) return 0;
+
+    const rootPath = getRepoPath();
+    const getTitleFromContent = (content: string, filename: string): string => {
+      let title = filename.replace(/\.md$/, "");
+      const titleMatch = content.match(/^#\s+(.+)$/m);
+      if (titleMatch && titleMatch[1].trim()) {
+        title = titleMatch[1].trim();
+      }
+      return title;
+    };
+
+    let backfilled = 0;
+    for (const relativePath of missing) {
+      try {
+        if (relativePath === "links.json") {
+          await this.indexLinksFile(null);
+        } else {
+          const fullPath = path.join(rootPath, relativePath);
+          if (!(await exists(fullPath))) continue;
+          // Use the file's current mtime, not the (possibly stale) sync-time
+          // map: files indexed during this very sync are absent from it and
+          // would otherwise be stored with updatedAt 0, forcing a full
+          // re-index on the next synchronization.
+          const stats = await fs.stat(fullPath);
+          const content = await fs.readFile(fullPath, "utf-8");
+          const dirName = path.dirname(relativePath);
+          await this.indexNoteInternal(
+            relativePath,
+            getTitleFromContent(content, path.basename(relativePath)),
+            dirName === "." ? "/" : dirName,
+            content,
+            stats.mtimeMs,
+            false,
+            true,
+          );
+        }
+        backfilled++;
+      } catch (err) {
+        console.error(`Error backfilling vectors for ${relativePath}:`, err);
+      }
+    }
+    if (backfilled > 0) {
+      console.log(
+        `Backfilled embeddings for ${backfilled} notes previously indexed without vectors.`,
+      );
+    }
+    return backfilled;
   }
 
   private chunkTextWithContext(

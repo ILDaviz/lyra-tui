@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useKeyboard } from "@opentui/react";
 import { useBindings } from "@opentui/keymap/react";
-import {
-  resolveAttachmentPath,
-  getAttachmentsDir,
-} from "@lyratui/core";
+import { resolveAttachmentPath, getAttachmentsDir } from "@lyratui/core";
 import { useTranslation } from "../../i18n";
 import { useTheme, getScrollbarOptions } from "../../theme";
 import { scrollIndexIntoView } from "../../utils/scrollHelper";
@@ -222,9 +219,7 @@ export function EditorAttachmentsModal({
           >
             {attachments.map((attachment, idx) => {
               const isSelected = selectedIndex === idx;
-              const prefix = idx === attachments.length - 1
-                ? "└── "
-                : "├── ";
+              const prefix = idx === attachments.length - 1 ? "└── " : "├── ";
               const name = displayName(attachment);
               const maxLen = Math.max(14, 30 - prefix.length);
 
@@ -244,9 +239,7 @@ export function EditorAttachmentsModal({
                     maxLength={maxLen}
                     isSelected={isSelected}
                     isFocused={true}
-                    fg={
-                      isSelected ? theme.accent.primary : theme.accent.cyan
-                    }
+                    fg={isSelected ? theme.accent.primary : theme.accent.cyan}
                   />
                 </box>
               );

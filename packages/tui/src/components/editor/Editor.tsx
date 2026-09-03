@@ -49,13 +49,9 @@ export function Editor(): any {
   const isWikilinkPickerOpen = useAppStore((s) => s.isWikilinkPickerOpen);
   const setIsWikilinkPickerOpen = useAppStore((s) => s.setWikilinkPickerOpen);
   const isAttachFileModalOpen = useAppStore((s) => s.isAttachFileModalOpen);
-  const setIsAttachFileModalOpen = useAppStore(
-    (s) => s.setAttachFileModalOpen,
-  );
+  const setIsAttachFileModalOpen = useAppStore((s) => s.setAttachFileModalOpen);
   const isAttachmentsListOpen = useAppStore((s) => s.isAttachmentsListOpen);
-  const setIsAttachmentsListOpen = useAppStore(
-    (s) => s.setAttachmentsListOpen,
-  );
+  const setIsAttachmentsListOpen = useAppStore((s) => s.setAttachmentsListOpen);
   const textareaRef = useRef<any>(null);
   const scrollboxRef = useRef<any>(null);
 
